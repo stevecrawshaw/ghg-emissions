@@ -1,7 +1,7 @@
 [project]
-name = "vs-code-setup"
+name = "ghg-emissions"
 version = "0.1.0"
-description = "New VS code setup from template"
+description = "Dashboard for greenhouse gas emissions data analysis"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
