@@ -34,11 +34,3 @@ A project to create a full - featured interactive, web based dashboard showing s
 
 - Free or cheap to host
 - Developed and maintained by a single data analyst with intermediate python skills
-
-## Glossary and abbreviations
-- LSOA: Lower Super Output Area
-- CA: Combined Authority
-- LA: Local Authority
-- IMD: Indices of Multiple Deprivation
-- EPC: Energy Performance Certificate
-- DFT: Department For Transport

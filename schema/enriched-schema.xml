@@ -1,0 +1,253 @@
+<?xml version='1.0' encoding='utf-8'?>
+<database name="ca_epc">
+  <table name="ca_boundaries_bgc_tbl" description="Geospatial boundaries for the Combined Authority (CA), generalised and clipped (BGC) to the coastline.">
+    <column name="FID" type="INTEGER" nullable="YES" description="Feature ID; unique identifier for the boundary feature." />
+    <column name="CAUTH25CD" type="VARCHAR" nullable="YES" description="Combined Authority (CA) GSS code (2025 standard)." />
+    <column name="CAUTH25NM" type="VARCHAR" nullable="YES" description="Combined Authority name." />
+    <column name="BNG_E" type="INTEGER" nullable="YES" description="British National Grid Easting coordinate." />
+    <column name="BNG_N" type="INTEGER" nullable="YES" description="British National Grid Northing coordinate." />
+    <column name="LONG" type="DOUBLE" nullable="YES" description="Longitude." />
+    <column name="LAT" type="DOUBLE" nullable="YES" description="Latitude." />
+    <column name="Shape__Area" type="DOUBLE" nullable="YES" description="Area of the geometry in square meters." />
+    <column name="Shape__Length" type="DOUBLE" nullable="YES" description="Length of the geometry perimeter." />
+    <column name="GlobalID" type="VARCHAR" nullable="YES" description="Global Unique Identifier for the feature." />
+    <column name="geom" type="GEOMETRY" nullable="YES" description="Spatial geometry object (polygon) defining the boundary." />
+  </table>
+  <table name="ca_emissions_evidence_long_tbl" description="Long-format dataset of historical CO2 emissions evidence for the Combined Authority, broken down by sector.">
+    <column name="region_country" type="VARCHAR" nullable="YES" />
+    <column name="local_authority" type="VARCHAR" nullable="YES" description="Name of the Local Authority." />
+    <column name="local_authority_code" type="VARCHAR" nullable="YES" description="GSS code for the Local Authority." />
+    <column name="calendar_year" type="BIGINT" nullable="YES" description="Year the emissions data refers to." />
+    <column name="population_000s_mid_year_estimate" type="DOUBLE" nullable="YES" description="Mid-year population estimate in thousands." />
+    <column name="per_capita_emissions_t_co2e" type="DOUBLE" nullable="YES" description="Per capita emissions in tonnes of CO2 equivalent." />
+    <column name="area_km2" type="DOUBLE" nullable="YES" description="Area of the authority in square kilometers." />
+    <column name="emissions_per_km2_kt_co2e" type="DOUBLE" nullable="YES" description="Emissions density (kilotonnes CO2e per km2)." />
+    <column name="sector" type="VARCHAR" nullable="YES" description="Economic sector responsible for emissions (e.g., Transport, Industry)." />
+    <column name="total_bool" type="BOOLEAN" nullable="YES" description="Boolean flag indicating if this row represents a grand total." />
+    <column name="grand_total" type="DOUBLE" nullable="YES" description="Total emissions for the row context." />
+    <column name="emissions_kt_co2e" type="DOUBLE" nullable="YES" description="Emissions in kilotonnes of CO2 equivalent." />
+    <column name="cauthcd" type="VARCHAR" nullable="YES" description="Combined Authority code." />
+    <column name="cauthnm" type="VARCHAR" nullable="YES" description="Combined Authority name." />
+  </table>
+  <table name="ca_la_dft_lookup_tbl" description="Lookup table linking Local Authority codes to Department for Transport (DFT) identifiers.">
+    <column name="dft_la_id" type="BIGINT" nullable="YES" description="Department for Transport Local Authority ID." />
+    <column name="ladcd" type="VARCHAR" nullable="YES" description="Local Authority District code (GSS)." />
+    <column name="year" type="BIGINT" nullable="YES" description="Reference year for the lookup." />
+  </table>
+  <table name="ca_la_tbl" description="Reference table defining Local Authorities (LA) within the Combined Authority (CA).">
+    <column name="ladcd" type="VARCHAR" nullable="YES" description="Local Authority District code." />
+    <column name="ladnm" type="VARCHAR" nullable="YES" description="Local Authority District name." />
+    <column name="cauthcd" type="VARCHAR" nullable="YES" description="Combined Authority code." />
+    <column name="cauthnm" type="VARCHAR" nullable="YES" description="Combined Authority name." />
+  </table>
+  <table name="emissions_tbl" description="Comprehensive Greenhouse Gas (GHG) emissions data by local authority and sector (Industry, Commercial, Public, Domestic, Transport, LULUCF, Agriculture, Waste).">
+    <column name="region_country" type="VARCHAR" nullable="YES" />
+    <column name="second_tier_authority" type="VARCHAR" nullable="YES" description="Upper tier authority (e.g., County Council) if applicable." />
+    <column name="local_authority" type="VARCHAR" nullable="YES" />
+    <column name="local_authority_code" type="VARCHAR" nullable="YES" />
+    <column name="calendar_year" type="BIGINT" nullable="YES" />
+    <column name="industry_total" type="DOUBLE" nullable="YES" description="Total emissions from the industrial sector." />
+    <column name="commercial_total" type="DOUBLE" nullable="YES" description="Total emissions from the commercial sector." />
+    <column name="public_sector_total" type="DOUBLE" nullable="YES" description="Total emissions from the public sector." />
+    <column name="domestic_total" type="DOUBLE" nullable="YES" description="Total emissions from domestic (residential) sources." />
+    <column name="transport_total" type="DOUBLE" nullable="YES" description="Total emissions from transport sources." />
+    <column name="lulucf_net_emissions" type="DOUBLE" nullable="YES" description="Net emissions from Land Use, Land-Use Change, and Forestry." />
+    <column name="agriculture_total" type="DOUBLE" nullable="YES" description="Total emissions from agriculture." />
+    <column name="waste_total" type="DOUBLE" nullable="YES" description="Total emissions from waste management." />
+    <column name="grand_total" type="DOUBLE" nullable="YES" description="Grand total of emissions across all sectors." />
+    <column name="per_capita_emissions_t_co2e" type="DOUBLE" nullable="YES" description="Emissions per person in tonnes of CO2e." />
+  </table>
+  <table name="epc_domestic_tbl" description="Energy Performance Certificate (EPC) data for domestic (residential) properties.">
+    <column name="LMK_KEY" type="VARCHAR" nullable="YES" description="Lodgement Key; unique identifier for the EPC certificate." />
+    <column name="ADDRESS1" type="VARCHAR" nullable="YES" />
+    <column name="POSTCODE" type="VARCHAR" nullable="YES" />
+    <column name="BUILDING_REFERENCE_NUMBER" type="VARCHAR" nullable="YES" description="Unique reference number for the building." />
+    <column name="CURRENT_ENERGY_RATING" type="VARCHAR" nullable="YES" description="Current Energy Efficiency Rating (A-G band)." />
+    <column name="POTENTIAL_ENERGY_RATING" type="VARCHAR" nullable="YES" description="Potential Energy Efficiency Rating (A-G band) if improvements are made." />
+    <column name="CURRENT_ENERGY_EFFICIENCY" type="INTEGER" nullable="YES" description="SAP rating (1-100) of the property's current energy efficiency." />
+    <column name="POTENTIAL_ENERGY_EFFICIENCY" type="INTEGER" nullable="YES" description="Potential SAP rating (1-100) if improvements are made." />
+    <column name="PROPERTY_TYPE" type="VARCHAR" nullable="YES" description="Type of property (e.g., House, Flat, Bungalow)." />
+    <column name="BUILT_FORM" type="VARCHAR" nullable="YES" description="Structural form (e.g., Detached, Semi-Detached, Mid-Terrace)." />
+    <column name="INSPECTION_DATE" type="DATE" nullable="YES" description="Date the energy inspection was carried out." />
+    <column name="LOCAL_AUTHORITY" type="VARCHAR" nullable="YES" />
+    <column name="CONSTITUENCY" type="VARCHAR" nullable="YES" />
+    <column name="LODGEMENT_DATE" type="DATE" nullable="YES" description="Date the certificate was lodged on the register." />
+    <column name="TRANSACTION_TYPE" type="VARCHAR" nullable="YES" description="Reason for the EPC (e.g., marketed sale, rental, new dwelling)." />
+    <column name="ENVIRONMENT_IMPACT_CURRENT" type="INTEGER" nullable="YES" description="Current Environmental Impact Rating (1-100), based on CO2 emissions." />
+    <column name="ENVIRONMENT_IMPACT_POTENTIAL" type="INTEGER" nullable="YES" description="Potential Environmental Impact Rating (1-100)." />
+    <column name="ENERGY_CONSUMPTION_CURRENT" type="DOUBLE" nullable="YES" description="Current energy consumption (kWh/m2 per year)." />
+    <column name="ENERGY_CONSUMPTION_POTENTIAL" type="DOUBLE" nullable="YES" description="Potential energy consumption (kWh/m2 per year)." />
+    <column name="CO2_EMISSIONS_CURRENT" type="DECIMAL(10,2)" nullable="YES" description="Current estimated CO2 emissions (tonnes per year)." />
+    <column name="CO2_EMISS_CURR_PER_FLOOR_AREA" type="DECIMAL(10,2)" nullable="YES" description="Current CO2 emissions per unit of floor area (kg/m2 per year)." />
+    <column name="CO2_EMISSIONS_POTENTIAL" type="DECIMAL(10,2)" nullable="YES" description="Potential CO2 emissions (tonnes per year)." />
+    <column name="TOTAL_FLOOR_AREA" type="DECIMAL(10,2)" nullable="YES" description="Total useful floor area (m2)." />
+    <column name="MAINS_GAS_FLAG" type="VARCHAR" nullable="YES" description="Indicator if the property is connected to mains gas (Y/N)." />
+    <column name="MAIN_HEATING_CONTROLS" type="VARCHAR" nullable="YES" description="Description of heating controls (e.g., programmer, room thermostat)." />
+    <column name="MULTI_GLAZE_PROPORTION" type="DOUBLE" nullable="YES" description="Percentage of windows that are multiple glazed." />
+    <column name="GLAZED_TYPE" type="VARCHAR" nullable="YES" description="Type of glazing (e.g., double glazing, triple glazing)." />
+    <column name="EXTENSION_COUNT" type="INTEGER" nullable="YES" description="Number of extensions to the property." />
+    <column name="NUMBER_HABITABLE_ROOMS" type="DOUBLE" nullable="YES" description="Count of habitable rooms." />
+    <column name="NUMBER_HEATED_ROOMS" type="DOUBLE" nullable="YES" description="Count of heated rooms." />
+    <column name="LOW_ENERGY_LIGHTING" type="INTEGER" nullable="YES" description="Percentage of fixed lighting outlets that are low energy." />
+    <column name="NUMBER_OPEN_FIREPLACES" type="INTEGER" nullable="YES" description="Number of open fireplaces." />
+    <column name="HOTWATER_DESCRIPTION" type="VARCHAR" nullable="YES" description="Description of the hot water system." />
+    <column name="WALLS_DESCRIPTION" type="VARCHAR" nullable="YES" description="Description of wall construction (e.g., Cavity wall)." />
+    <column name="ROOF_DESCRIPTION" type="VARCHAR" nullable="YES" description="Description of roof construction." />
+    <column name="MAINHEAT_DESCRIPTION" type="VARCHAR" nullable="YES" description="Description of the main heating system." />
+    <column name="MAIN_FUEL" type="VARCHAR" nullable="YES" description="Main fuel type used for heating (e.g., mains gas, electricity)." />
+    <column name="PHOTO_SUPPLY" type="DOUBLE" nullable="YES" description="Percentage of photovoltaic (solar) power supply." />
+    <column name="SOLAR_WATER_HEATING_FLAG" type="VARCHAR" nullable="YES" description="Indicator if solar water heating is present (Y/N)." />
+    <column name="MECHANICAL_VENTILATION" type="VARCHAR" nullable="YES" description="Type of mechanical ventilation system, if any." />
+    <column name="CONSTRUCTION_AGE_BAND" type="VARCHAR" nullable="YES" description="Approximate period when the property was built (e.g., 1930-1949)." />
+    <column name="TENURE" type="VARCHAR" nullable="YES" description="Housing tenure type (e.g., Owner-occupied, Rented)." />
+    <column name="UPRN" type="VARCHAR" nullable="YES" description="Unique Property Reference Number; persistent identifier." />
+    <column name="UPRN_SOURCE" type="VARCHAR" nullable="YES" description="Source of the UPRN matching." />
+  </table>
+  <table name="epc_nondom_tbl" description="Energy Performance Certificate (EPC) data for non-domestic (commercial/industrial) properties.">
+    <column name="LMK_KEY" type="VARCHAR" nullable="YES" description="Lodgement Key; unique identifier for the EPC certificate." />
+    <column name="ADDRESS1" type="VARCHAR" nullable="YES" />
+    <column name="POSTCODE" type="VARCHAR" nullable="YES" />
+    <column name="BUILDING_REFERENCE_NUMBER" type="VARCHAR" nullable="YES" description="Unique reference number for the building." />
+    <column name="ASSET_RATING" type="INTEGER" nullable="YES" description="CO2 emission index (0-150+); lower values indicate better performance (unlike domestic ratings)." />
+    <column name="ASSET_RATING_BAND" type="VARCHAR" nullable="YES" description="Energy efficiency band (A+ to G) based on asset rating." />
+    <column name="PROPERTY_TYPE" type="VARCHAR" nullable="YES" description="Commercial property type (e.g., Office, Retail, Warehouse)." />
+    <column name="INSPECTION_DATE" type="DATE" nullable="YES" />
+    <column name="LOCAL_AUTHORITY" type="VARCHAR" nullable="YES" />
+    <column name="TRANSACTION_TYPE" type="VARCHAR" nullable="YES" description="Reason for the EPC (e.g., Mandatory issue on sale/lease)." />
+    <column name="NEW_BUILD_BENCHMARK" type="VARCHAR" nullable="YES" description="Benchmark rating for a new building of this type." />
+    <column name="EXISTING_STOCK_BENCHMARK" type="VARCHAR" nullable="YES" description="Benchmark rating for existing building stock of this type." />
+    <column name="BUILDING_LEVEL" type="VARCHAR" nullable="YES" description="Complexity level of the building assessment (Level 3, 4, or 5)." />
+    <column name="MAIN_HEATING_FUEL" type="VARCHAR" nullable="YES" description="Primary fuel used for heating." />
+    <column name="RENEWABLE_SOURCES" type="VARCHAR" nullable="YES" description="Description of on-site renewable energy sources." />
+    <column name="FLOOR_AREA" type="INTEGER" nullable="YES" description="Total useful floor area (m2)." />
+    <column name="STANDARD_EMISSIONS" type="DECIMAL(10,2)" nullable="YES" description="Standard CO2 emissions for this building type." />
+    <column name="TARGET_EMISSIONS" type="DECIMAL(10,2)" nullable="YES" description="Target CO2 emissions rate." />
+    <column name="TYPICAL_EMISSIONS" type="DECIMAL(10,2)" nullable="YES" description="Typical CO2 emissions for this building type." />
+    <column name="BUILDING_EMISSIONS" type="DECIMAL(10,2)" nullable="YES" description="Actual calculated CO2 emissions rate for the building." />
+    <column name="AIRCON_PRESENT" type="VARCHAR" nullable="YES" description="Indicates presence of air conditioning." />
+    <column name="AIRCON_KW_RATING" type="DECIMAL(10,2)" nullable="YES" description="Rated output of the air conditioning system (kW)." />
+    <column name="AC_INSPECTION_COMMISSIONED" type="INTEGER" nullable="YES" description="Flag indicating if an AC inspection has been commissioned." />
+    <column name="BUILDING_ENVIRONMENT" type="VARCHAR" nullable="YES" description="Dominant ventilation/conditioning environment (e.g., Air Conditioning, Natural Ventilation)." />
+    <column name="PRIMARY_ENERGY_VALUE" type="INTEGER" nullable="YES" description="Primary energy use per square meter." />
+    <column name="UPRN" type="BIGINT" nullable="YES" description="Unique Property Reference Number." />
+  </table>
+  <table name="ghg_emissions_tbl" description="Official Greenhouse Gas (GHG) emissions statistics by territory and scope of influence.">
+    <column name="country" type="VARCHAR" nullable="YES" />
+    <column name="local_authority" type="VARCHAR" nullable="YES" />
+    <column name="local_authority_code" type="VARCHAR" nullable="YES" />
+    <column name="calendar_year" type="BIGINT" nullable="YES" />
+    <column name="la_ghg_sector" type="VARCHAR" nullable="YES" description="High-level sector for GHG reporting." />
+    <column name="la_ghg_sub_sector" type="VARCHAR" nullable="YES" description="Detailed sub-sector for GHG reporting." />
+    <column name="greenhouse_gas" type="VARCHAR" nullable="YES" description="Type of gas (usually CO2 or CO2e)." />
+    <column name="territorial_emissions_kt_co2e" type="DOUBLE" nullable="YES" description="Emissions generated within the territory boundaries (kilotonnes CO2e)." />
+    <column name="emissions_within_the_scope_of_influence_of_las_kt_co2" type="DOUBLE" nullable="YES" description="Emissions considered within the Local Authority's scope of influence (subset of territorial)." />
+  </table>
+  <table name="imd_lsoa_tbl" description="Indices of Multiple Deprivation (IMD) data aggregated at the LSOA level.">
+    <column name="lsoa11cd" type="VARCHAR" nullable="YES" description="LSOA code (2011 Census)." />
+    <column name="income_deprivation_domain_rank" type="BIGINT" nullable="YES" description="Rank of income deprivation (1 is most deprived)." />
+    <column name="index_of_multiple_deprivation_imd_decile" type="BIGINT" nullable="YES" description="Overall IMD decile (1 is most deprived 10% of areas)." />
+    <column name="employment_deprivation_domain_rank" type="BIGINT" nullable="YES" />
+    <column name="education_skills_and_training_domain_rank" type="BIGINT" nullable="YES" />
+    <column name="crime_domain_rank" type="BIGINT" nullable="YES" />
+    <column name="health_deprivation_and_disability_domain_rank" type="BIGINT" nullable="YES" />
+    <column name="living_environment_deprivation_domain_decile" type="BIGINT" nullable="YES" />
+    <column name="index_of_multiple_deprivation_imd_score" type="BIGINT" nullable="YES" description="Overall IMD score calculated from domain scores." />
+  </table>
+  <table name="la_all_mysoc_tbl" description="Registry of UK Local Authorities containing codes, names, and metadata, potentially sourced from MySociety/MapIt.">
+    <column name="local-authority-code" type="VARCHAR" nullable="YES" description="Primary code for the Local Authority." />
+    <column name="official-name" type="VARCHAR" nullable="YES" />
+    <column name="gss-code" type="VARCHAR" nullable="YES" description="Government Statistical Service (ONS) code." />
+    <column name="pop-2020" type="DOUBLE" nullable="YES" description="Population estimate (2020)." />
+    <column name="lat" type="DOUBLE" nullable="YES" />
+    <column name="long" type="DOUBLE" nullable="YES" />
+  </table>
+  <table name="lsoa_2011_lookup_tbl" description="Lookup table mapping 2011 Census LSOAs to higher geographies.">
+    <column name="lsoa11cd" type="VARCHAR" nullable="YES" description="LSOA code (2011)." />
+    <column name="lsoa11nm" type="VARCHAR" nullable="YES" description="LSOA name (2011)." />
+    <column name="lad11cd" type="VARCHAR" nullable="YES" description="Local Authority District code (2011)." />
+  </table>
+  <table name="lsoa_2021_lookup_tbl" description="Lookup table mapping 2021 Census LSOAs to Wards and Local Authorities.">
+    <column name="lsoa21cd" type="VARCHAR" nullable="YES" description="LSOA code (2021)." />
+    <column name="lsoa21nm" type="VARCHAR" nullable="YES" description="LSOA name (2021)." />
+    <column name="wd24cd" type="VARCHAR" nullable="YES" description="Ward code (2024)." />
+    <column name="lad24cd" type="VARCHAR" nullable="YES" description="Local Authority District code (2024)." />
+  </table>
+  <table name="lsoa_2021_pwc_tbl" description="Population Weighted Centroids (PWC) for 2021 LSOAs.">
+    <column name="lsoa21cd" type="VARCHAR" nullable="YES" description="LSOA code (2021)." />
+    <column name="x" type="DOUBLE" nullable="YES" description="Easting coordinate." />
+    <column name="y" type="DOUBLE" nullable="YES" description="Northing coordinate." />
+    <column name="geom" type="GEOMETRY" nullable="YES" />
+  </table>
+  <table name="lsoa_poly_2011_tbl" description="Polygon geometry for Lower Super Output Areas (2011 Census).">
+    <column name="LSOA11CD" type="VARCHAR" nullable="YES" description="LSOA code (2011)." />
+    <column name="geometry" type="GEOMETRY" nullable="YES" description="Polygon geometry." />
+  </table>
+  <table name="lsoa_poly_2021_tbl" description="Polygon geometry for Lower Super Output Areas (2021 Census).">
+    <column name="LSOA21CD" type="VARCHAR" nullable="YES" description="LSOA code (2021)." />
+    <column name="geometry" type="GEOMETRY" nullable="YES" description="Polygon geometry." />
+  </table>
+  <table name="postcodes_tbl" description="Directory of UK postcodes including geolocation and administrative hierarchy codes.">
+    <column name="pcd7" type="VARCHAR" nullable="YES" description="Postcode in 7-character format." />
+    <column name="pcd8" type="VARCHAR" nullable="YES" description="Postcode in 8-character format." />
+    <column name="pcds" type="VARCHAR" nullable="YES" description="Postcode with single space." />
+    <column name="dointr" type="BIGINT" nullable="YES" description="Date of introduction." />
+    <column name="doterm" type="BIGINT" nullable="YES" description="Date of termination (if applicable)." />
+    <column name="lad25cd" type="VARCHAR" nullable="YES" description="Local Authority District code (2025)." />
+    <column name="lsoa11cd" type="VARCHAR" nullable="YES" description="LSOA code (2011)." />
+    <column name="lsoa21cd" type="VARCHAR" nullable="YES" description="LSOA code (2021)." />
+    <column name="lat" type="DOUBLE" nullable="YES" description="Latitude." />
+    <column name="long" type="DOUBLE" nullable="YES" description="Longitude." />
+    <column name="imd20ind" type="BIGINT" nullable="YES" description="IMD 2020 Index score." />
+  </table>
+  <table name="postcode_lookup_tbl" description="Simplified lookup table for linking postcodes to statistical geographies.">
+    <column name="pcds" type="VARCHAR" nullable="YES" description="Postcode." />
+    <column name="lsoa21cd" type="VARCHAR" nullable="YES" description="LSOA code (2021)." />
+    <column name="ladcd" type="VARCHAR" nullable="YES" description="Local Authority District code." />
+  </table>
+  <table name="tenure_tbl" description="Housing tenure statistics (owned vs. rented) by LSOA.">
+    <column name="lsoa21cd" type="VARCHAR" nullable="YES" description="LSOA code (2021)." />
+    <column name="total_all_households" type="BIGINT" nullable="YES" description="Total number of households in the area." />
+    <column name="owned" type="BIGINT" nullable="YES" description="Count of households owned outright." />
+    <column name="social_rented" type="BIGINT" nullable="YES" description="Count of households in social housing." />
+    <column name="private_rented" type="BIGINT" nullable="YES" description="Count of privately rented households." />
+  </table>
+  <table name="ca_la_ghg_emissions_sub_sector_ods_vw" description="View: Open Data Standard (ODS) formatted view of GHG emissions by sub-sector for the Combined Authority.">
+    <column name="local_authority" type="VARCHAR" nullable="YES" />
+    <column name="la_ghg_sector" type="VARCHAR" nullable="YES" />
+    <column name="la_ghg_sub_sector" type="VARCHAR" nullable="YES" />
+    <column name="territorial_emissions_kt_co2e" type="DOUBLE" nullable="YES" />
+  </table>
+  <table name="epc_domestic_lep_vw" description="View: Domestic EPC data filtered geographically for the West of England Local Enterprise Partnership (LEP) area.">
+    <column name="LMK_KEY" type="VARCHAR" nullable="YES" />
+    <column name="CURRENT_ENERGY_RATING" type="VARCHAR" nullable="YES" />
+    <column name="CO2_EMISSIONS_CURRENT" type="DECIMAL(10,2)" nullable="YES" />
+  </table>
+  <table name="epc_domestic_ods_vw" description="View: Simplified domestic EPC data optimized for Open Data Standard (ODS) export, including calculated fields like tenure and derived construction dates.">
+    <column name="lmk_key" type="VARCHAR" nullable="YES" />
+    <column name="uprn" type="VARCHAR" nullable="YES" />
+    <column name="geo_point_2d" type="VARCHAR" nullable="YES" description="Combined Lat/Long point." />
+    <column name="n_nominal_construction_date" type="INTEGER" nullable="YES" description="Calculated numeric year of construction from the age band." />
+    <column name="construction_epoch" type="VARCHAR" nullable="YES" description="Broad era of construction (e.g., 'Before 1900', '1930 to present')." />
+  </table>
+  <table name="epc_domestic_vw" description="View: Enriched domestic EPC data joined with Postcode, Tenure, and IMD (Deprivation) data.">
+    <column name="NOMINAL_CONSTRUCTION_YEAR" type="INTEGER" nullable="YES" description="Calculated mid-point year of the construction age band." />
+    <column name="CONSTRUCTION_EPOCH" type="VARCHAR" nullable="YES" description="Categorical epoch of construction derived from the nominal year." />
+    <column name="TENURE_CLEAN" type="VARCHAR" nullable="YES" description="Standardized tenure category (Owner occupied, Social rented, Private rented)." />
+    <column name="imd20ind" type="BIGINT" nullable="YES" description="IMD 2020 Index rank." />
+  </table>
+  <table name="epc_non_domestic_ods_vw" description="View: Non-domestic EPC data optimized for Open Data Standard (ODS) export, filtered for the West of England area.">
+    <column name="uprn" type="BIGINT" nullable="YES" />
+    <column name="asset_rating" type="INTEGER" nullable="YES" description="Building CO2 emission index." />
+  </table>
+  <table name="epc_non_domestic_vw" description="View: Enriched non-domestic EPC data joined with Local Authority and Postcode geography.">
+    <column name="ASSET_RATING" type="INTEGER" nullable="YES" />
+    <column name="lsoa21cd" type="VARCHAR" nullable="YES" />
+  </table>
+  <table name="per_cap_emissions_ca_national_vw" description="View: Calculated per capita emissions for the Combined Authority area, aggregated by year.">
+    <column name="per_cap" type="DOUBLE" nullable="YES" description="Emissions per capita (tonnes)." />
+  </table>
+  <table name="simple_geog_lookup_vw" description="View: Simplified geography lookup linking Postcodes to Wards, LSOAs, and Local Authorities within the West of England.">
+    <column name="pcds" type="VARCHAR" nullable="YES" />
+    <column name="ladnm" type="VARCHAR" nullable="YES" />
+  </table>
+</database>
