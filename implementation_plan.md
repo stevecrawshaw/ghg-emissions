@@ -3,7 +3,7 @@
 **Project**: West of England Combined Authority GHG Emissions Dashboard
 **Stage**: Exploratory/Prototyping → Production
 **Last Updated**: 2025-11-21
-**Status**: 🟢 Phase 4.1 Tested & Verified → Phase 4.2/4.3 Ready to Start
+**Status**: 🟢 Phase 4.4 Complete → Phase 4.3/4.5 Ready to Start
 
 ---
 
@@ -13,12 +13,12 @@
 Phase 1: Foundation & Setup          [████████████████████████] 100% ✅
 Phase 2: Data Layer                  [████████████████████████] 100% ✅
 Phase 3: Visualization Components    [████████████████████████] 100% ✅
-Phase 4: Dashboard Pages             [█████───────────────────] 20% 🚧
+Phase 4: Dashboard Pages             [██████████──────────────] 40% 🚧
 Phase 5: Testing & Quality           [────────────────────────]  0% ⏳
 Phase 6: Deployment Preparation      [────────────────────────]  0% ⏳
 ```
 
-**Overall Progress**: 54% (Phases 1-3 complete, Phase 4 in progress)
+**Overall Progress**: 60% (Phases 1-3 complete, Phase 4 40% complete)
 
 ---
 
@@ -282,14 +282,22 @@ Phase 6: Deployment Preparation      [──────────────
   - [ ] Filter by LA, property type, rating
   - [ ] Download data button
 
-#### 4.4: Geographic View Page ⏳ PENDING
-- [ ] Create `pages/3_🗺️_Geographic_Analysis.py`
-  - [ ] Interactive choropleth map
-  - [ ] Geographic level selector (LSOA, MSOA, LA, CA)
-  - [ ] Metric selector (emissions, per capita, EPC rating)
-  - [ ] Click for detailed view
-  - [ ] Deprivation overlay option
-  - [ ] Download map data
+#### 4.4: Geographic View Page ✅ COMPLETE
+- [x] Create `pages/2_🗺️_Geographic_Analysis.py` (269 lines)
+  - [x] Interactive bubble map showing LA emissions
+  - [x] Year selector (single year, 2019-2023)
+  - [x] Sector filter with select all option
+  - [x] Metric selector (total emissions, per capita, per km²)
+  - [x] Summary statistics cards (total, average, min, max)
+  - [x] Sortable data table with 1 decimal place formatting
+  - [x] Export functionality (CSV, Parquet, JSON, Excel)
+  - [x] Map performance optimized (no flashing on interaction)
+
+**Key Fixes Applied**:
+- Used `returned_objects=[]` in st_folium to prevent map flashing
+- Pure Polars Excel export via xlsxwriter (no pandas conversion)
+- Modern Polars JSON export via to_dicts() method
+- Consistent 1 decimal place formatting throughout
 
 #### 4.5: Insights & Comparisons Page ⏳ PENDING
 - [ ] Create `pages/4_💡_Insights.py`
