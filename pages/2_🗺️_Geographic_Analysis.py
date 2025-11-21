@@ -226,10 +226,11 @@ try:
         lat_col="lat",
         lon_col="lon",
         size_col=selected_metric,
-        label_col="la_name",
+        name_col="la_name",
+        value_col=selected_metric,
         center=(51.4545, -2.5879),
         zoom_start=10,
-        max_bubble_size=50,
+        max_radius=50,
     )
 
     # Display map
