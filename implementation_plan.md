@@ -11,14 +11,14 @@
 
 ```
 Phase 1: Foundation & Setup          [████████████████████████] 100% ✅
-Phase 2: Data Layer                  [--------------------]  0% ⏳
+Phase 2: Data Layer                  [█████-----------------] 25% ⏳
 Phase 3: Visualization Components    [--------------------]  0% ⏳
 Phase 4: Dashboard Pages             [--------------------]  0% ⏳
 Phase 5: Testing & Quality           [--------------------]  0% ⏳
 Phase 6: Deployment Preparation      [--------------------]  0% ⏳
 ```
 
-**Overall Progress**: 17% (Phase 1 complete, Phase 2 starting)
+**Overall Progress**: 21% (Phase 1 complete, Phase 2: 25% complete)
 
 ---
 
@@ -54,18 +54,21 @@ Phase 6: Deployment Preparation      [--------------------]  0% ⏳
 
 ---
 
-## Phase 2: Data Layer ⏳ 0%
+## Phase 2: Data Layer ⏳ 25%
 
 **Goal**: Implement MotherDuck connection and data access patterns
 
 ### Tasks
 
-#### 2.1: Database Connection
-- [ ] Create `src/data/connections.py`
-  - [ ] Implement `get_connection()` with env token
-  - [ ] Add connection error handling
-  - [ ] Add connection testing function
-  - [ ] Document usage patterns
+#### 2.1: Database Connection ✅ COMPLETE
+- [x] Create `src/data/connections.py`
+  - [x] Implement `get_connection()` with env token
+  - [x] Add connection error handling
+  - [x] Add connection testing function
+  - [x] Document usage patterns
+  - [x] Implement `get_table_list()` and `get_table_info()`
+  - [x] Add SQL injection prevention
+  - [x] Create 19 comprehensive unit tests (all passing)
 
 #### 2.2: Data Loaders
 - [ ] Create `src/data/loaders.py`
