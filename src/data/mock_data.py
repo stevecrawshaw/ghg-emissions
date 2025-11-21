@@ -238,14 +238,36 @@ def load_emissions_data_with_fallback(
         Tuple of (DataFrame, is_mock_data_boolean)
     """
     from src.data.connections import MotherDuckConnectionError
-    from src.data.loaders import load_emissions_data
+    from src.data.loaders import load_emissions_data, load_local_authorities
 
     try:
-        # Try to load real data
+        # Convert LA names to codes for the query
+        la_codes = None
+        if local_authorities:
+            # Load LA lookup table
+            las_df = load_local_authorities()
+            # Create name to code mapping
+            if "ladnm" in las_df.columns and "ladcd" in las_df.columns:
+                name_to_code = dict(
+                    zip(
+                        las_df["ladnm"].to_list(),
+                        las_df["ladcd"].to_list(),
+                        strict=False,
+                    )
+                )
+                # Convert selected names to codes
+                la_codes = [
+                    name_to_code.get(la_name, la_name) for la_name in local_authorities
+                ]
+            else:
+                # If columns don't match expected, try as-is
+                la_codes = local_authorities
+
+        # Try to load real data with LA codes
         df = load_emissions_data(
             start_year=start_year,
             end_year=end_year,
-            local_authorities=local_authorities,
+            local_authorities=la_codes,
             sectors=sectors,
         )
         # Standardize column names to match mock data format
