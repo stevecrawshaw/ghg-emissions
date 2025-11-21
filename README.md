@@ -26,6 +26,7 @@ A project to create a full - featured interactive, web based dashboard showing s
 - Interactive spatial representation using e.g. leaflet or similar
 - Remote data source: Motherduck instance for the main data sources
 - Motherduck is an OLAP database which uses duckDB SQL syntax
+- An enriched xml schema for the database is in schema\ along with the original schema.sql
 - A modern dashboarding library with tabs
 - Python frameworks preferred for ease of maintenance
 - Support compact modern data formats like parquet

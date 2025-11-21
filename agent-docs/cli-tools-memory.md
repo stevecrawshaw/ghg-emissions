@@ -12,12 +12,8 @@
     - rg -l "pattern" | xargs sed -i 's/old/new/g' for mass replacements
     - RESPECT WHITE SPACE in .py files
   5. Project Structure:
-<<<<<<< HEAD:agent-docs/cli-tools-memory.md
-    - tree -L 2 directories for quick overview in powershell
+    - tree directories for quick overview in POWERSHELL
     - 'cmd //c tree' from bash
-=======
-    - 'cmd //c tree' directory tree overview
->>>>>>> 8199cc1e092fbf74f5892423964f56401c3d6536:cli-tools-memory.md
   6. JSON Inspection:
     - jq '.key' file.json for quick JSON parsing
   7. Get help: Use e.g. rg --help
