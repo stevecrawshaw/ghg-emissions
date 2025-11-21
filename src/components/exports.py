@@ -563,6 +563,6 @@ def create_data_summary_card(
 
         st.dataframe(
             pl.DataFrame(col_info),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
