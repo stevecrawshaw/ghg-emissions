@@ -21,7 +21,7 @@
                 "--db-path",
                 "md:",
                 "--motherduck-token",
-                "MOTHERDUCK_TOKEN_PLACEHOLDER"
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im11cnJheWphcnZpc0BnbWFpbC5jb20iLCJzZXNzaW9uIjoibXVycmF5amFydmlzLmdtYWlsLmNvbSIsInBhdCI6ImFTN01NOTNzWXA4Qk90VFZDNlFrT1UwZlBKMWMzTUVqNFpmUV9nWXowUU0iLCJ1c2VySWQiOiJhMjRkYTM2Ni0zYTA1LTQ2NjQtYmMwOS1mYzA5YWU5OTZiM2EiLCJpc3MiOiJtZF9wYXQiLCJyZWFkT25seSI6ZmFsc2UsImlhdCI6MTczMDgzODU3Mn0.IQxWVjIHnqMRlCn7mOk1NODVB-1P2KBHbJlVHL42ehs"
             ],
             "env": {}
         },
