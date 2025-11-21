@@ -63,6 +63,11 @@ st.sidebar.header("🔍 Filters")
 las_df, is_mock = load_local_authorities_with_fallback()
 available_las = las_df["la_name"].to_list()
 
+# Debug: Show available LA names (remove this after verification)
+if not is_mock:
+    first_five = ", ".join(sorted(available_las)[:5])
+    st.sidebar.info(f"📋 Available LAs ({len(available_las)}): {first_five}...")
+
 # Year range filter
 start_year, end_year = year_range_filter(
     min_year=2014,
@@ -73,13 +78,24 @@ start_year, end_year = year_range_filter(
 )
 
 # Local authority selector
+# Use flexible defaults: try WECA authorities, fall back to first available
+default_las = []
+for name in [
+    "Bristol, City of",
+    "Bristol",
+    "Bath and North East Somerset",
+    "South Gloucestershire",
+]:
+    if name in available_las:
+        default_las.append(name)
+
+# If no matches found, use first 3 available
+if not default_las:
+    default_las = available_las[: min(3, len(available_las))]
+
 selected_las = la_selector(
     local_authorities=available_las,
-    default_selection=[
-        "Bristol",
-        "Bath and North East Somerset",
-        "South Gloucestershire",
-    ],
+    default_selection=default_las,
     allow_multiple=True,
     key="la_selector_overview",
     help_text="Select one or more local authorities to analyze",
