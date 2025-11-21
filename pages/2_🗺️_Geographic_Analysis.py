@@ -233,8 +233,8 @@ try:
         max_radius=50,
     )
 
-    # Display map (use key to prevent unnecessary rerenders)
-    st_folium(m, width=None, height=600, key="geo_map")
+    # Display map (no key to let Streamlit handle naturally)
+    st_folium(m, width=None, height=600)
 
     st.markdown("---")
 
