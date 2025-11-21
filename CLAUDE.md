@@ -279,12 +279,20 @@ import os
 import duckdb
 
 def get_connection() -> duckdb.DuckDBPyConnection:
-    """Get MotherDuck connection using environment token."""
+    """Get MotherDuck connection using environment token.
+
+    Connects to the 'mca_data' database on MotherDuck which contains
+    all GHG emissions, EPC, geographic, and socio-economic data.
+    """
     token = os.getenv("MOTHERDUCK_TOKEN")
     if not token:
         raise ValueError("MOTHERDUCK_TOKEN not set")
     return duckdb.connect(f"md:?motherduck_token={token}")
 ```
+
+**Database**: `mca_data` on MotherDuck
+- Contains all tables described in `schema/schema.sql`
+- See `schema/enriched-schema.xml` for detailed table/column descriptions
 
 **Access Pattern**: Read-only
 - No writes to MotherDuck
@@ -299,14 +307,49 @@ def get_connection() -> duckdb.DuckDBPyConnection:
 - Include schema validation in tests
 - Document schema changes in git commits
 
+### Schema Introspection
+
+**Enriched Schema Documentation**: `schema/enriched-schema.xml`
+- Contains `<description>` tags for all tables and columns in the `mca_data` database
+- Use this file to understand table purposes and column meanings
+- More detailed than the raw SQL schema
+- Helpful for data exploration and query planning
+
+**Example Usage**:
+```python
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
+# Parse enriched schema for documentation
+schema_path = Path("schema/enriched-schema.xml")
+tree = ET.parse(schema_path)
+root = tree.getroot()
+
+# Extract table descriptions programmatically
+for table in root.findall(".//table"):
+    name = table.get("name")
+    desc = table.find("description")
+    if desc is not None:
+        print(f"{name}: {desc.text}")
+```
+
 ### Data Tables Overview
 
 **Key Tables** (from `schema/schema.sql`):
 
 **Emissions**:
+- `ghg_emissions_tbl`: **Primary emissions dataset** - most comprehensive GHG data
+  - Contains detailed greenhouse gas emissions by sector and sub-sector
+  - Territorial emissions and emissions within scope of LA influence
+  - This is the source dataset - use this for new analysis
 - `emissions_tbl`: LA-level emissions by sector (2005-2023)
+  - Derived from `ghg_emissions_tbl`, reshaped and aggregated
+  - Useful for sector-based analysis at LA level
 - `ca_emissions_evidence_long_tbl`: CA-level long format
-- `ghg_emissions_tbl`: Detailed GHG breakdown
+  - Derived and augmented from primary emissions data
+  - Optimized for Combined Authority comparisons and time series
+
+**Note**: When starting new emissions analysis, prefer `ghg_emissions_tbl` as the source of truth
 
 **Energy Performance Certificates**:
 - `epc_domestic_tbl`: Domestic properties (~80+ columns)
