@@ -208,14 +208,21 @@ def export_to_excel(
         if isinstance(dfs, pl.DataFrame):
             dfs = {"Data": dfs}
 
-        # Use pandas ExcelWriter with xlsxwriter engine for multiple sheets
-        import pandas as pd
+        # Use xlsxwriter.Workbook for multiple sheets with Polars native write_excel
+        import xlsxwriter
 
-        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+        workbook = xlsxwriter.Workbook(buffer, {"in_memory": True})
+
+        try:
             for sheet_name, df in dfs.items():
-                # Convert Polars to Pandas and write
-                pd_df = df.to_pandas()
-                pd_df.to_excel(writer, sheet_name=sheet_name, index=False)
+                # Use Polars native write_excel with xlsxwriter workbook
+                df.write_excel(
+                    workbook=workbook,
+                    worksheet=sheet_name,
+                    autofit=True,
+                )
+        finally:
+            workbook.close()
 
         buffer.seek(0)
         return buffer.getvalue()
