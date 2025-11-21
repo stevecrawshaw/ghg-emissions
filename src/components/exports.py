@@ -145,22 +145,25 @@ def export_to_json(
         >>> st.download_button("Download JSON", json_data, "data.json")
     """
     try:
+        import json
+
+        # Convert DataFrame to dict, then to JSON string
         if orient == "records":
             # Array of objects: [{"col1": val, "col2": val}, ...]
-            json_str = df.write_json(row_oriented=True)
+            # Use rows(named=True) to get list of dicts
+            data = df.to_dicts()
         elif orient == "columns":
             # Object with columns: {"col1": [vals], "col2": [vals]}
-            json_str = df.write_json(row_oriented=False)
+            data = df.to_dict()
         else:
             msg = f"Invalid orient '{orient}'. Must be 'records' or 'columns'"
             raise ExportError(msg, export_format="json")
 
-        # Polars doesn't have built-in pretty printing, so we'll use json module
+        # Convert to JSON string with optional pretty printing
         if pretty:
-            import json
-
-            json_obj = json.loads(json_str)
-            json_str = json.dumps(json_obj, indent=2)
+            json_str = json.dumps(data, indent=2, ensure_ascii=False)
+        else:
+            json_str = json.dumps(data, ensure_ascii=False)
 
         return json_str.encode("utf-8")
     except ExportError:
