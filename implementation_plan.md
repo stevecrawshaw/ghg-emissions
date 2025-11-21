@@ -11,14 +11,14 @@
 
 ```
 Phase 1: Foundation & Setup          [████████████████████████] 100% ✅
-Phase 2: Data Layer                  [█████-----------------] 25% ⏳
+Phase 2: Data Layer                  [███████████████-----] 75% ⏳
 Phase 3: Visualization Components    [--------------------]  0% ⏳
 Phase 4: Dashboard Pages             [--------------------]  0% ⏳
 Phase 5: Testing & Quality           [--------------------]  0% ⏳
 Phase 6: Deployment Preparation      [--------------------]  0% ⏳
 ```
 
-**Overall Progress**: 21% (Phase 1 complete, Phase 2: 25% complete)
+**Overall Progress**: 29% (Phase 1 complete, Phase 2: 75% complete)
 
 ---
 
@@ -54,7 +54,7 @@ Phase 6: Deployment Preparation      [--------------------]  0% ⏳
 
 ---
 
-## Phase 2: Data Layer ⏳ 25%
+## Phase 2: Data Layer ⏳ 50%
 
 **Goal**: Implement MotherDuck connection and data access patterns
 
@@ -70,21 +70,30 @@ Phase 6: Deployment Preparation      [--------------------]  0% ⏳
   - [x] Add SQL injection prevention
   - [x] Create 19 comprehensive unit tests (all passing)
 
-#### 2.2: Data Loaders
-- [ ] Create `src/data/loaders.py`
-  - [ ] Implement emissions data loader (`load_emissions_data()`)
-  - [ ] Implement EPC data loader (`load_epc_data()`)
-  - [ ] Implement geography data loader (`load_geography_data()`)
-  - [ ] Add Streamlit caching decorators
-  - [ ] Add performance monitoring
+#### 2.2: Data Loaders ✅ COMPLETE
+- [x] Create `src/data/loaders.py`
+  - [x] Implement emissions data loader (`load_emissions_data()`)
+  - [x] Implement EPC data loader (`load_epc_domestic_data()`)
+  - [x] Implement geography data loaders:
+    - [x] `load_local_authorities()` - LA/CA mappings
+    - [x] `load_postcodes()` - Postcode lookup
+    - [x] `load_lsoa_boundaries()` - LSOA polygons
+  - [x] Add Streamlit caching decorators (1-2 hour TTL)
+  - [x] Add performance monitoring (timing, slow query warnings)
+  - [x] Implement `get_data_freshness()` utility
+  - [x] Create 17 comprehensive unit tests (all passing)
 
-#### 2.3: Data Transformations
-- [ ] Create `src/data/transforms.py`
-  - [ ] Per capita emissions calculation
-  - [ ] Emissions per km² calculation
-  - [ ] Time series aggregations
-  - [ ] Geographic aggregations (LSOA→MSOA→LA→CA)
-  - [ ] Sector aggregations
+#### 2.3: Data Transformations ✅ COMPLETE
+- [x] Create `src/data/transforms.py`
+  - [x] Per capita emissions calculation
+  - [x] Emissions per km² calculation
+  - [x] Time series aggregations
+  - [x] Geographic aggregations (LSOA→MSOA→LA→CA)
+  - [x] Sector aggregations
+  - [x] Custom TransformationError exception
+  - [x] Comprehensive input validation
+  - [x] Support for custom column names
+  - [x] Create 28 comprehensive unit tests (all passing)
 
 #### 2.4: Data Validation
 - [ ] Create `src/data/validators.py`
@@ -97,10 +106,10 @@ Phase 6: Deployment Preparation      [--------------------]  0% ⏳
 - MotherDuck token available
 
 ### Acceptance Criteria
-- [ ] Can connect to mca_data database
-- [ ] Can load all primary datasets
-- [ ] Data transformations tested and working
-- [ ] Performance < 2s for typical queries
+- [x] Can connect to mca_data database
+- [x] Can load all primary datasets
+- [x] Data transformations tested and working
+- [ ] Performance < 2s for typical queries (to be verified with integration tests)
 
 ---
 
