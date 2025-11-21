@@ -208,11 +208,16 @@ def export_to_excel(
         if isinstance(dfs, pl.DataFrame):
             dfs = {"Data": dfs}
 
-        # Write to Excel using openpyxl engine
-        with pl.ExcelWriter(buffer) as writer:
-            for sheet_name, df in dfs.items():
-                df.write_excel(writer, worksheet=sheet_name)
+        # Use pandas ExcelWriter with xlsxwriter engine for multiple sheets
+        import pandas as pd
 
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            for sheet_name, df in dfs.items():
+                # Convert Polars to Pandas and write
+                pd_df = df.to_pandas()
+                pd_df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+        buffer.seek(0)
         return buffer.getvalue()
     except Exception as e:
         msg = f"Failed to export to Excel: {e}"
