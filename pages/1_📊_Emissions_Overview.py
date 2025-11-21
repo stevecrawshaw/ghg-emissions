@@ -179,6 +179,9 @@ with st.spinner("Loading emissions data..."):
             agg_functions=["sum"],
         )
 
+        # Sort by year and LA to ensure correct line plotting order
+        ts_df = ts_df.sort(["la_name", "calendar_year"])
+
         # Create time series chart
         fig_ts = create_time_series(
             ts_df,
@@ -205,6 +208,9 @@ with st.spinner("Loading emissions data..."):
             year_col="calendar_year",
             agg_functions=["sum"],
         )
+
+        # Sort by year and sector to ensure correct plotting order
+        sector_df = sector_df.sort(["calendar_year", "sector"])
 
         # Create stacked area chart
         fig_stacked = create_stacked_area(
