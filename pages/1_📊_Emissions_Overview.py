@@ -192,7 +192,7 @@ with st.spinner("Loading emissions data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_ts, use_container_width=True)
+        st.plotly_chart(fig_ts, width="stretch")
 
     with col2:
         st.markdown("### Sector Breakdown Over Time")
@@ -218,7 +218,7 @@ with st.spinner("Loading emissions data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_stacked, use_container_width=True)
+        st.plotly_chart(fig_stacked, width="stretch")
 
     st.markdown("---")
 
@@ -253,7 +253,7 @@ with st.spinner("Loading emissions data..."):
         template="weca",
     )
 
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_bar, width="stretch")
 
     st.markdown("---")
 
