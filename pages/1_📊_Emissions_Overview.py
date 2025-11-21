@@ -186,8 +186,8 @@ with st.spinner("Loading emissions data..."):
             y=f"{selected_metric}_sum",
             color="la_name",
             title=f"Emissions Over Time - {metrics[selected_metric]}",
-            x_title="Year",
-            y_title=metrics[selected_metric],
+            x_label="Year",
+            y_label=metrics[selected_metric],
             markers=True,
             template="weca",
         )
@@ -213,8 +213,8 @@ with st.spinner("Loading emissions data..."):
             y=f"{selected_metric}_sum",
             group="sector",
             title=f"Emissions by Sector - {metrics[selected_metric]}",
-            x_title="Year",
-            y_title=metrics[selected_metric],
+            x_label="Year",
+            y_label=metrics[selected_metric],
             template="weca",
         )
 
@@ -247,8 +247,8 @@ with st.spinner("Loading emissions data..."):
         x="la_name",
         y=f"{selected_metric}_sum",
         title=f"Emissions Comparison ({latest_year}) - {metrics[selected_metric]}",
-        x_title="Local Authority",
-        y_title=metrics[selected_metric],
+        x_label="Local Authority",
+        y_label=metrics[selected_metric],
         orientation="v",
         template="weca",
     )
