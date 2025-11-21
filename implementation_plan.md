@@ -3,7 +3,7 @@
 **Project**: West of England Combined Authority GHG Emissions Dashboard
 **Stage**: Exploratory/Prototyping → Production
 **Last Updated**: 2025-11-21
-**Status**: 🟢 Phase 4.1 Complete → Phase 4.2 Ready to Start
+**Status**: 🟢 Phase 4.1 Tested & Verified → Phase 4.2/4.3 Ready to Start
 
 ---
 
@@ -223,7 +223,7 @@ Phase 6: Deployment Preparation      [──────────────
 
 ### Tasks
 
-#### 4.1: Main Application ✅ COMPLETE
+#### 4.1: Main Application ✅ COMPLETE & TESTED
 - [x] Create `app.py`
   - [x] Set up page config with WECA branding
   - [x] Add navigation sidebar with quick links
@@ -233,24 +233,37 @@ Phase 6: Deployment Preparation      [──────────────
   - [x] Load environment variables with python-dotenv
   - [x] Register WECA Plotly template
   - [x] Add custom CSS for WECA styling
+- [x] Create mock data fallback system (`src/data/mock_data.py`)
+- [x] Test with real MotherDuck data
+- [x] Fix all data integration issues:
+  - [x] LA name variations (Bristol vs Bristol, City of)
+  - [x] Include North Somerset alongside WECA authorities
+  - [x] LA name-to-code conversion for database queries
+  - [x] Column name standardization (territorial_emissions → total_emissions)
+  - [x] Metric calculations (per_capita, per_km2)
+  - [x] Chart parameter corrections (x_label, y_label)
+  - [x] Time series sorting for correct plotting order
 
 **Deliverables**:
 - `app.py` (228 lines) - Main entry point with WECA branding
-- `pages/1_📊_Emissions_Overview.py` (341 lines) - First dashboard page
+- `pages/1_📊_Emissions_Overview.py` (347 lines) - First dashboard page
+- `src/data/mock_data.py` (307 lines) - Automatic fallback for MotherDuck outages
 - Enhanced `.streamlit/config.toml` with WECA theme
 - Added python-dotenv dependency
 
 **Features**:
 - WECA-branded home page with comprehensive navigation
 - Interactive Emissions Overview page with:
-  - Year range, LA, sector, and metric filters
-  - Time series chart by LA
+  - Year range, LA (including North Somerset), sector, and metric filters
+  - Time series chart by LA (properly sorted)
   - Stacked area chart by sector
   - Bar chart for LA comparison
   - Key insights metrics (total, average, % change)
   - Data export (CSV, Parquet, JSON, Excel)
 - Comprehensive error handling for database connectivity
+- Automatic fallback to mock data when MotherDuck unavailable
 - All code passes ruff linting
+- **Verified working with real MotherDuck data**
 
 #### 4.2: Emissions Analysis Page ⏳ READY TO START
 - [ ] Create additional emissions visualizations (optional enhancement)
