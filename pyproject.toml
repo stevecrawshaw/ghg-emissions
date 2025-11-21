@@ -11,6 +11,7 @@ dependencies = [
     "httpx>=0.27.0",
     "pyyaml",
     "pyarrow",
+    "streamlit>=1.51.0",
 ]
 
 [dependency-groups]
