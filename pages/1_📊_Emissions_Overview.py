@@ -288,7 +288,7 @@ with st.spinner("Loading emissions data..."):
     with col1:
         st.metric(
             label=f"Total {metrics[selected_metric]}",
-            value=f"{total_emissions:,.0f}",
+            value=f"{total_emissions:,.1f}",
             delta=None,
         )
 

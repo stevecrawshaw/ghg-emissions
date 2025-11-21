@@ -241,12 +241,12 @@ try:
     # Data table
     st.markdown("## 📋 Detailed Data")
 
-    # Prepare display dataframe
+    # Prepare display dataframe with 1 decimal place formatting
     display_df = agg_df.select([
         pl.col("la_name").alias("Local Authority"),
-        pl.col("total_emissions").alias("Total Emissions (kt CO2e)"),
-        pl.col("per_capita").alias("Per Capita (t CO2e/person)"),
-        pl.col("per_km2").alias("Emissions Density (t CO2e/km²)"),
+        pl.col("total_emissions").round(1).alias("Total Emissions (kt CO2e)"),
+        pl.col("per_capita").round(1).alias("Per Capita (t CO2e/person)"),
+        pl.col("per_km2").round(1).alias("Emissions Density (t CO2e/km²)"),
     ])
 
     # Sort by selected metric
