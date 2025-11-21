@@ -22,8 +22,10 @@ from src.components.filters import (
     sector_filter,
     year_range_filter,
 )
-from src.data.connections import MotherDuckConnectionError, get_connection
-from src.data.loaders import load_emissions_data, load_local_authorities
+from src.data.mock_data import (
+    load_emissions_data_with_fallback,
+    load_local_authorities_with_fallback,
+)
 from src.data.transforms import aggregate_time_series
 from src.visualization.charts import (
     create_bar_comparison,
@@ -57,81 +59,76 @@ st.markdown(
 # Sidebar filters
 st.sidebar.header("🔍 Filters")
 
-try:
-    # Connect to database
-    conn = get_connection()
+# Load available local authorities (with automatic fallback to mock data)
+las_df, is_mock = load_local_authorities_with_fallback()
+available_las = las_df["la_name"].to_list()
 
-    # Load available local authorities
-    las_df = load_local_authorities(conn)
-    available_las = las_df["la_name"].to_list()
+# Year range filter
+start_year, end_year = year_range_filter(
+    min_year=2014,
+    max_year=2023,
+    default_range=(2019, 2023),
+    key="year_range_overview",
+    help_text="Select the time period for emissions analysis",
+)
 
-    # Year range filter
-    start_year, end_year = year_range_filter(
-        min_year=2014,
-        max_year=2023,
-        default_range=(2019, 2023),
-        key="year_range_overview",
-        help_text="Select the time period for emissions analysis",
+# Local authority selector
+selected_las = la_selector(
+    local_authorities=available_las,
+    default_selection=[
+        "Bristol",
+        "Bath and North East Somerset",
+        "South Gloucestershire",
+    ],
+    allow_multiple=True,
+    key="la_selector_overview",
+    help_text="Select one or more local authorities to analyze",
+)
+
+# Available sectors (from CLAUDE.md schema)
+sectors = [
+    "Industry",
+    "Commercial",
+    "Public Sector",
+    "Domestic",
+    "Transport",
+    "Agriculture",
+    "LULUCF",
+]
+
+# Sector filter
+selected_sectors = sector_filter(
+    sectors=sectors,
+    default_selection=sectors,
+    allow_all=True,
+    key="sector_filter_overview",
+    help_text="Select emission sectors to include in analysis",
+)
+
+# Metric selector
+metrics = {
+    "total_emissions": "Total Emissions (kt CO2e)",
+    "per_capita": "Per Capita (t CO2e per person)",
+    "per_km2": "Emissions Density (t CO2e per km²)",
+}
+
+selected_metric = metric_selector(
+    metrics=metrics,
+    default_metric="total_emissions",
+    key="metric_selector_overview",
+    help_text="Choose the emission metric to visualize",
+)
+
+st.sidebar.markdown("---")
+
+# Load emissions data (with automatic fallback to mock data)
+with st.spinner("Loading emissions data..."):
+    df, is_mock = load_emissions_data_with_fallback(
+        start_year=start_year,
+        end_year=end_year,
+        local_authorities=selected_las,
+        sectors=selected_sectors,
     )
-
-    # Local authority selector
-    selected_las = la_selector(
-        local_authorities=available_las,
-        default_selection=[
-            "Bristol",
-            "Bath and North East Somerset",
-            "South Gloucestershire",
-        ],
-        allow_multiple=True,
-        key="la_selector_overview",
-        help_text="Select one or more local authorities to analyze",
-    )
-
-    # Available sectors (from CLAUDE.md schema)
-    sectors = [
-        "Industry",
-        "Commercial",
-        "Public Sector",
-        "Domestic",
-        "Transport",
-        "Agriculture",
-        "LULUCF",
-    ]
-
-    # Sector filter
-    selected_sectors = sector_filter(
-        sectors=sectors,
-        default_selection=sectors,
-        allow_all=True,
-        key="sector_filter_overview",
-        help_text="Select emission sectors to include in analysis",
-    )
-
-    # Metric selector
-    metrics = {
-        "total_emissions": "Total Emissions (kt CO2e)",
-        "per_capita": "Per Capita (t CO2e per person)",
-        "per_km2": "Emissions Density (t CO2e per km²)",
-    }
-
-    selected_metric = metric_selector(
-        metrics=metrics,
-        default_metric="total_emissions",
-        key="metric_selector_overview",
-        help_text="Choose the emission metric to visualize",
-    )
-
-    st.sidebar.markdown("---")
-
-    # Load data
-    with st.spinner("Loading emissions data..."):
-        df = load_emissions_data(
-            conn,
-            start_year=start_year,
-            end_year=end_year,
-            local_authorities=selected_las,
-            sectors=selected_sectors,
-        )
 
     # Check if data is empty
     if df.is_empty():
@@ -296,46 +293,3 @@ try:
         formats=["csv", "parquet", "json", "excel"],
         key_prefix="emissions_export",
     )
-
-    # Close connection
-    conn.close()
-
-except MotherDuckConnectionError as e:
-    st.error(
-        f"""
-        ### ❌ Database Connection Error
-
-        Could not connect to the MotherDuck database.
-
-        **Error:** {e.message}
-
-        **Troubleshooting:**
-        1. Check that the `MOTHERDUCK_TOKEN` environment variable is set
-           in your `.env` file
-        2. Verify your network connection
-        3. Ensure your MotherDuck token is valid and has not expired
-
-        **For local development:**
-        - Copy `.env.example` to `.env`
-        - Add your MotherDuck token to the `MOTHERDUCK_TOKEN` variable
-        - Restart the Streamlit app
-        """
-    )
-    st.stop()
-
-except Exception as e:
-    st.error(
-        f"""
-        ### ❌ Unexpected Error
-
-        An unexpected error occurred while loading the dashboard.
-
-        **Error:** {e}
-
-        Please report this issue if it persists.
-        """
-    )
-    import traceback
-
-    st.code(traceback.format_exc())
-    st.stop()
