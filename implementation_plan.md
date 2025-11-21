@@ -3,7 +3,7 @@
 **Project**: West of England Combined Authority GHG Emissions Dashboard
 **Stage**: Exploratory/Prototyping → Production
 **Last Updated**: 2025-11-21
-**Status**: 🟢 Phase 3 Complete → Phase 4 Ready to Start
+**Status**: 🟢 Phase 4.1 Complete → Phase 4.2 Ready to Start
 
 ---
 
@@ -13,12 +13,12 @@
 Phase 1: Foundation & Setup          [████████████████████████] 100% ✅
 Phase 2: Data Layer                  [████████████████████████] 100% ✅
 Phase 3: Visualization Components    [████████████████████████] 100% ✅
-Phase 4: Dashboard Pages             [────────────────────────]  0% ⏳
+Phase 4: Dashboard Pages             [█████───────────────────] 20% 🚧
 Phase 5: Testing & Quality           [────────────────────────]  0% ⏳
 Phase 6: Deployment Preparation      [────────────────────────]  0% ⏳
 ```
 
-**Overall Progress**: 50% (Phases 1-3 complete)
+**Overall Progress**: 54% (Phases 1-3 complete, Phase 4 in progress)
 
 ---
 
@@ -217,38 +217,50 @@ Phase 6: Deployment Preparation      [──────────────
 
 ---
 
-## Phase 4: Dashboard Pages ⏳ 0%
+## Phase 4: Dashboard Pages 🚧 20% (1 of 5 sub-phases complete)
 
 **Goal**: Create multi-page Streamlit application
 
 ### Tasks
 
-#### 4.1: Main Application
-- [ ] Create `app.py`
-  - [ ] Set up page config with WECA branding
-  - [ ] Add navigation sidebar
-  - [ ] Add project header/footer
-  - [ ] Configure Streamlit settings
+#### 4.1: Main Application ✅ COMPLETE
+- [x] Create `app.py`
+  - [x] Set up page config with WECA branding
+  - [x] Add navigation sidebar with quick links
+  - [x] Add project header with WECA gradient
+  - [x] Add footer with license info
+  - [x] Configure Streamlit settings (.streamlit/config.toml)
+  - [x] Load environment variables with python-dotenv
+  - [x] Register WECA Plotly template
+  - [x] Add custom CSS for WECA styling
 
-#### 4.2: Home Page
-- [ ] Create `src/pages/1_🏠_Home.py`
-  - [ ] Project overview and description
-  - [ ] Key metrics dashboard (current year totals)
-  - [ ] Quick navigation to main sections
-  - [ ] Data freshness indicator
-  - [ ] About WECA information
+**Deliverables**:
+- `app.py` (228 lines) - Main entry point with WECA branding
+- `pages/1_📊_Emissions_Overview.py` (341 lines) - First dashboard page
+- Enhanced `.streamlit/config.toml` with WECA theme
+- Added python-dotenv dependency
 
-#### 4.3: Emissions Analysis Page
-- [ ] Create `src/pages/2_📊_Emissions.py`
-  - [ ] Time series view (10 years)
-  - [ ] Sector breakdown (stacked charts)
-  - [ ] LA comparison view
+**Features**:
+- WECA-branded home page with comprehensive navigation
+- Interactive Emissions Overview page with:
+  - Year range, LA, sector, and metric filters
+  - Time series chart by LA
+  - Stacked area chart by sector
+  - Bar chart for LA comparison
+  - Key insights metrics (total, average, % change)
+  - Data export (CSV, Parquet, JSON, Excel)
+- Comprehensive error handling for database connectivity
+- All code passes ruff linting
+
+#### 4.2: Emissions Analysis Page ⏳ READY TO START
+- [ ] Create additional emissions visualizations (optional enhancement)
   - [ ] Per capita vs absolute toggle
-  - [ ] Data filters (year, LA, sector)
-  - [ ] Download data button
+  - [ ] Multi-year comparison charts
+  - [ ] Sector deep-dive analysis
+  - [ ] Trend analysis with projections
 
-#### 4.4: EPC Analysis Page
-- [ ] Create `src/pages/3_🏘️_EPC.py`
+#### 4.3: EPC Analysis Page ⏳ PENDING
+- [ ] Create `pages/2_🏘️_EPC_Analysis.py`
   - [ ] Current energy ratings distribution
   - [ ] Improvement potential analysis
   - [ ] Property type breakdown
@@ -257,8 +269,8 @@ Phase 6: Deployment Preparation      [──────────────
   - [ ] Filter by LA, property type, rating
   - [ ] Download data button
 
-#### 4.5: Geographic View Page
-- [ ] Create `src/pages/4_🗺️_Geography.py`
+#### 4.4: Geographic View Page ⏳ PENDING
+- [ ] Create `pages/3_🗺️_Geographic_Analysis.py`
   - [ ] Interactive choropleth map
   - [ ] Geographic level selector (LSOA, MSOA, LA, CA)
   - [ ] Metric selector (emissions, per capita, EPC rating)
@@ -266,8 +278,8 @@ Phase 6: Deployment Preparation      [──────────────
   - [ ] Deprivation overlay option
   - [ ] Download map data
 
-#### 4.6: Comparisons Page
-- [ ] Create `src/pages/5_📈_Comparisons.py`
+#### 4.5: Insights & Comparisons Page ⏳ PENDING
+- [ ] Create `pages/4_💡_Insights.py`
   - [ ] WECA vs other Combined Authorities
   - [ ] WECA vs regional/national benchmarks
   - [ ] Time series comparisons
