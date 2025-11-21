@@ -173,9 +173,9 @@ with st.spinner("Loading emissions data..."):
         # Aggregate by year and LA
         ts_df = aggregate_time_series(
             df,
-            time_col="calendar_year",
+            group_cols=["calendar_year", "la_name"],
             value_col=selected_metric,
-            group_cols=["la_name"],
+            year_col="calendar_year",
             agg_functions=["sum"],
         )
 
@@ -200,9 +200,9 @@ with st.spinner("Loading emissions data..."):
         # Aggregate by year and sector
         sector_df = aggregate_time_series(
             df,
-            time_col="calendar_year",
+            group_cols=["calendar_year", "sector"],
             value_col=selected_metric,
-            group_cols=["sector"],
+            year_col="calendar_year",
             agg_functions=["sum"],
         )
 
@@ -232,9 +232,9 @@ with st.spinner("Loading emissions data..."):
     # Aggregate by LA
     la_comparison = aggregate_time_series(
         latest_df,
-        time_col="calendar_year",
-        value_col=selected_metric,
         group_cols=["la_name"],
+        value_col=selected_metric,
+        year_col="calendar_year",
         agg_functions=["sum"],
     )
 
