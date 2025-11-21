@@ -1,7 +1,7 @@
 """Emissions Overview Dashboard Page.
 
 Interactive visualization of greenhouse gas emissions for WECA local authorities
-across multiple sectors and time periods.
+and North Somerset (candidate authority) across multiple sectors and time periods.
 
 Features:
 - Time series analysis of emissions trends
@@ -51,8 +51,10 @@ st.set_page_config(
 st.title("📊 Emissions Overview")
 st.markdown(
     """
-    Analyze greenhouse gas emissions trends across the West of England region.
-    Filter by time period, local authority, and sector to explore the data.
+    Analyze greenhouse gas emissions trends across the West of England Combined
+    Authority (Bath and North East Somerset, Bristol, South Gloucestershire) and
+    North Somerset (candidate authority). Filter by time period, local authority,
+    and sector to explore the data.
     """
 )
 
@@ -78,20 +80,21 @@ start_year, end_year = year_range_filter(
 )
 
 # Local authority selector
-# Use flexible defaults: try WECA authorities, fall back to first available
+# Use flexible defaults: WECA + North Somerset (candidate authority)
 default_las = []
 for name in [
     "Bristol, City of",
     "Bristol",
     "Bath and North East Somerset",
     "South Gloucestershire",
+    "North Somerset",
 ]:
     if name in available_las:
         default_las.append(name)
 
-# If no matches found, use first 3 available
+# If no matches found, use first 4 available (to match WECA + North Somerset)
 if not default_las:
-    default_las = available_las[: min(3, len(available_las))]
+    default_las = available_las[: min(4, len(available_las))]
 
 selected_las = la_selector(
     local_authorities=available_las,
