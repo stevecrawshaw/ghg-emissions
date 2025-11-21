@@ -118,17 +118,15 @@ try:
         st.warning("⚠️ No data available for the selected filters.")
         st.stop()
 
-    # Convert LA codes back to names for display
-    df = df.join(
-        las_df.select([pl.col("ladcd"), pl.col("ladnm")]),
-        left_on="la_code",
-        right_on="ladcd",
-        how="left",
-    )
+    # Rename columns to match expected names
+    df = df.rename({
+        "local_authority_code": "la_code",
+        "local_authority": "la_name",
+    })
 
     # Aggregate by LA using group_by
     agg_df = (
-        df.group_by(["la_code", "ladnm"])
+        df.group_by(["la_code", "la_name"])
         .agg([
             pl.col("territorial_emissions_kt_co2e").sum().alias("total_emissions"),
             pl.col("mid_year_population_thousands").first(),
@@ -172,7 +170,7 @@ try:
 
     with col3:
         max_val = agg_df[selected_metric].max()
-        max_la = agg_df.filter(pl.col(selected_metric) == max_val)["ladnm"][0]
+        max_la = agg_df.filter(pl.col(selected_metric) == max_val)["la_name"][0]
         st.metric(
             label="Highest",
             value=f"{max_la}",
@@ -181,7 +179,7 @@ try:
 
     with col4:
         min_val = agg_df[selected_metric].min()
-        min_la = agg_df.filter(pl.col(selected_metric) == min_val)["ladnm"][0]
+        min_la = agg_df.filter(pl.col(selected_metric) == min_val)["la_name"][0]
         st.metric(
             label="Lowest",
             value=f"{min_la}",
@@ -212,11 +210,11 @@ try:
 
     # Add coordinates to dataframe
     agg_df = agg_df.with_columns([
-        pl.col("ladnm").map_elements(
+        pl.col("la_name").map_elements(
             lambda x: la_coords.get(x, (51.4545, -2.5879))[0],
             return_dtype=pl.Float64,
         ).alias("lat"),
-        pl.col("ladnm").map_elements(
+        pl.col("la_name").map_elements(
             lambda x: la_coords.get(x, (51.4545, -2.5879))[1],
             return_dtype=pl.Float64,
         ).alias("lon"),
@@ -228,7 +226,7 @@ try:
         lat_col="lat",
         lon_col="lon",
         size_col=selected_metric,
-        label_col="ladnm",
+        label_col="la_name",
         center=(51.4545, -2.5879),
         zoom_start=10,
         max_bubble_size=50,
@@ -244,7 +242,7 @@ try:
 
     # Prepare display dataframe
     display_df = agg_df.select([
-        pl.col("ladnm").alias("Local Authority"),
+        pl.col("la_name").alias("Local Authority"),
         pl.col("total_emissions").alias("Total Emissions (kt CO2e)"),
         pl.col("per_capita").alias("Per Capita (t CO2e/person)"),
         pl.col("per_km2").alias("Emissions Density (t CO2e/km²)"),
