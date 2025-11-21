@@ -1,0 +1,223 @@
+[
+    {
+        "typography_brand": {
+            "headline": {
+                "font": "Avenir Black",
+                "usage": "For headlines"
+            },
+            "introduction": {
+                "font": "Avenir Medium",
+                "usage": "For introduction copy"
+            },
+            "subheading": {
+                "font": "Open Sans Bold",
+                "usage": "For Subheadings"
+            },
+            "body": {
+                "font": "Open Sans Regular",
+                "usage": "For Body Copy"
+            }
+        }
+    },
+    {
+        "typography_system": {
+            "headline": {
+                "font": "Trebuchet MS Bold",
+                "usage": "For headlines"
+            },
+            "introduction": {
+                "font": "Trebuchet MS Regular",
+                "usage": "For introduction copy"
+            },
+            "subheading": {
+                "font": "Trebuchet MS Bold",
+                "usage": "For Subheadings"
+            },
+            "body": {
+                "font": "Trebuchet MS Regular",
+                "usage": "For Body Copy"
+            }
+        }
+    },
+    {
+        "colors": {
+            "primary_colors": {
+                "west_green": {
+                    "rgb": {
+                        "r": 64,
+                        "g": 168,
+                        "b": 50
+                    },
+                    "hex": "#40A832",
+                    "cmyk": {
+                        "c": 73,
+                        "m": 0,
+                        "y": 98,
+                        "k": 0
+                    },
+                    "pms": "361",
+                    "ral": "6018"
+                },
+                "forest_green": {
+                    "rgb": {
+                        "r": 29,
+                        "g": 79,
+                        "b": 43
+                    },
+                    "hex": "#1D4F2B",
+                    "cmyk": {
+                        "c": 87,
+                        "m": 42,
+                        "y": 92,
+                        "k": 45
+                    },
+                    "pms": "357",
+                    "ral": "6029"
+                },
+                "rich_purple": {
+                    "rgb": {
+                        "r": 89,
+                        "g": 0,
+                        "b": 117
+                    },
+                    "hex": "#590075",
+                    "cmyk": {
+                        "c": 83,
+                        "m": 100,
+                        "y": 19,
+                        "k": 7
+                    }
+                },
+                "claret": {
+                    "rgb": {
+                        "r": 206,
+                        "g": 19,
+                        "b": 45
+                    },
+                    "hex": "#CE132D",
+                    "cmyk": {
+                        "c": 12,
+                        "m": 100,
+                        "y": 82,
+                        "k": 3
+                    }
+                },
+                "black": {
+                    "rgb": {
+                        "r": 31,
+                        "g": 31,
+                        "b": 31
+                    },
+                    "hex": "#1F1F1F",
+                    "cmyk": {
+                        "c": 0,
+                        "m": 0,
+                        "y": 0,
+                        "k": 80
+                    }
+                }
+            },
+            "secondary_colors": {
+                "grey": {
+                    "rgb": {
+                        "r": 60,
+                        "g": 60,
+                        "b": 60
+                    },
+                    "hex": "#3C3C3C",
+                    "cmyk": {
+                        "c": 0,
+                        "m": 0,
+                        "y": 0,
+                        "k": 60
+                    }
+                },
+                "park_green": {
+                    "rgb": {
+                        "r": 0,
+                        "g": 125,
+                        "b": 0
+                    },
+                    "hex": "#007D00",
+                    "cmyk": {
+                        "c": 87,
+                        "m": 23,
+                        "y": 100,
+                        "k": 12
+                    },
+                    "pms": "356"
+                },
+                "soft_green": {
+                    "rgb": {
+                        "r": 143,
+                        "g": 204,
+                        "b": 135
+                    },
+                    "hex": "#8FCC87",
+                    "cmyk": {
+                        "c": 50,
+                        "m": 0,
+                        "y": 59,
+                        "k": 0
+                    }
+                },
+                "soft_purple": {
+                    "rgb": {
+                        "r": 156,
+                        "g": 102,
+                        "b": 171
+                    },
+                    "hex": "#9C66AB",
+                    "cmyk": {
+                        "c": 47,
+                        "m": 67,
+                        "y": 0,
+                        "k": 0
+                    }
+                },
+                "soft_claret": {
+                    "rgb": {
+                        "r": 237,
+                        "g": 128,
+                        "b": 115
+                    },
+                    "hex": "#ED8073",
+                    "cmyk": {
+                        "c": 1,
+                        "m": 61,
+                        "y": 49,
+                        "k": 0
+                    }
+                },
+                "warm_grey": {
+                    "rgb": {
+                        "r": 166,
+                        "g": 166,
+                        "b": 165
+                    },
+                    "hex": "#A6A6A5",
+                    "cmyk": {
+                        "c": 37,
+                        "m": 29,
+                        "y": 30,
+                        "k": 8
+                    }
+                },
+                "white": {
+                    "rgb": {
+                        "r": 255,
+                        "g": 255,
+                        "b": 255
+                    },
+                    "hex": "#FFFFFF",
+                    "cmyk": {
+                        "c": 0,
+                        "m": 0,
+                        "y": 0,
+                        "k": 0
+                    }
+                }
+            }
+        }
+    }
+]
