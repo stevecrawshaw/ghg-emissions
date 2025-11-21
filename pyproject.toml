@@ -17,6 +17,7 @@ dependencies = [
     "streamlit-folium>=0.25.3",
     "altair>=5.5.0",
     "python-dotenv>=1.2.1",
+    "xlsxwriter>=3.2.9",
 ]
 
 [dependency-groups]
