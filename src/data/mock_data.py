@@ -276,6 +276,33 @@ def load_emissions_data_with_fallback(
         if "la_ghg_sector" in df.columns:
             df = df.rename({"la_ghg_sector": "sector"})
 
+        # Add calculated metric columns to match mock data format
+        if "territorial_emissions_kt_co2e" in df.columns:
+            # total_emissions is the same as territorial_emissions
+            df = df.with_columns(
+                pl.col("territorial_emissions_kt_co2e").alias("total_emissions")
+            )
+
+            # Calculate per capita if population data available
+            if "mid_year_population_thousands" in df.columns:
+                df = df.with_columns(
+                    (
+                        pl.col("territorial_emissions_kt_co2e")
+                        * 1000
+                        / (pl.col("mid_year_population_thousands") * 1000)
+                    ).alias("per_capita")
+                )
+
+            # Calculate per km2 if area data available
+            if "area_km2" in df.columns:
+                df = df.with_columns(
+                    (
+                        pl.col("territorial_emissions_kt_co2e")
+                        * 1000
+                        / pl.col("area_km2")
+                    ).alias("per_km2")
+                )
+
         return df, False  # Real data
 
     except MotherDuckConnectionError as e:
