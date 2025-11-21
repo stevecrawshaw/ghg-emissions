@@ -1,4 +1,4 @@
 #!/bin/bash
-apt install fd-find
-apt install bat
+sudo apt install -y fd-find
+sudo apt install -y bat
 exit 0
