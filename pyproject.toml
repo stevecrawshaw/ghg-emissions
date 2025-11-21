@@ -12,6 +12,10 @@ dependencies = [
     "pyyaml",
     "pyarrow",
     "streamlit>=1.51.0",
+    "plotly>=6.5.0",
+    "folium>=0.20.0",
+    "streamlit-folium>=0.25.3",
+    "altair>=5.5.0",
 ]
 
 [dependency-groups]
