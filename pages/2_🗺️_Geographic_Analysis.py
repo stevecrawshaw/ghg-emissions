@@ -233,8 +233,8 @@ try:
         max_radius=50,
     )
 
-    # Display map
-    st_folium(m, width=None, height=600)
+    # Display map (use key to prevent unnecessary rerenders)
+    st_folium(m, width=None, height=600, key="geo_map")
 
     st.markdown("---")
 
@@ -269,8 +269,8 @@ try:
 
     create_export_menu(
         df=display_df,
-        filename_prefix=f"geographic_emissions_{year}",
-        key="geo_export",
+        base_filename=f"geographic_emissions_{year}",
+        key_prefix="geo_export",
     )
 
 except MotherDuckConnectionError:
