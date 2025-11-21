@@ -55,8 +55,24 @@ year = single_year_filter(
     key="geo_year",
 )
 
-# Sector filter
-selected_sectors = sector_filter(key="geo_sectors")
+# Sector filter - all available sectors
+sectors = [
+    "Transport",
+    "Domestic",
+    "Industry",
+    "Commercial",
+    "Public Sector",
+    "Agriculture",
+    "LULUCF",
+]
+
+selected_sectors = sector_filter(
+    sectors=sectors,
+    default_selection=sectors,
+    allow_all=True,
+    key="geo_sectors",
+    help_text="Select emission sectors to include in analysis",
+)
 
 # Metric selector
 metrics = {
