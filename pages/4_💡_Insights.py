@@ -304,7 +304,7 @@ st.sidebar.header("🔍 Filters")
 selected_year = single_year_filter(
     min_year=2014,
     max_year=2023,
-    default_year=2022,
+    default_year=2023,
     key="insights_year",
     help_text="Select year for comparison snapshot",
 )
