@@ -296,12 +296,14 @@ with st.spinner("Loading EPC data..."):
 
         # Use construction_epoch (cleaned/categorized) with nominal year for sorting
         # Aggregate only by epoch to avoid subdivisions in bar chart
+        # Fill null years with 1850 to ensure "Before 1900" sorts first
         age_counts = (
             df.group_by("construction_epoch")
             .agg(
                 pl.len().alias("count"),
                 pl.col("nominal_construction_year").first().alias("sort_year"),
             )
+            .with_columns(pl.col("sort_year").fill_null(1850))
             .sort("sort_year")
             .drop("sort_year")
         )
@@ -327,12 +329,14 @@ with st.spinner("Loading EPC data..."):
 
         # Create heatmap of rating vs construction epoch (use long format data)
         # Aggregate by epoch and rating, use a representative year for sorting
+        # Fill null years with 1850 to ensure "Before 1900" sorts first
         age_rating = (
             df.group_by(["construction_epoch", "current_energy_rating"])
             .agg(
                 pl.len().alias("count"),
                 pl.col("nominal_construction_year").first().alias("sort_year"),
             )
+            .with_columns(pl.col("sort_year").fill_null(1850))
             .sort(["sort_year", "current_energy_rating"])
         )
 
