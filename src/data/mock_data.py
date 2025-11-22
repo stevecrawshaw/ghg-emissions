@@ -441,6 +441,38 @@ def get_mock_epc_domestic_data(
         0.05,
     ]
 
+    # Mapping from age band to construction epoch (cleaned/categorized)
+    age_band_to_epoch = {
+        "before 1900": "Pre-1900",
+        "1900-1929": "1900-1929",
+        "1930-1949": "1930-1949",
+        "1950-1966": "1950-1966",
+        "1967-1975": "1967-1982",
+        "1976-1982": "1967-1982",
+        "1983-1990": "1983-1995",
+        "1991-1995": "1983-1995",
+        "1996-2002": "1996-2006",
+        "2003-2006": "1996-2006",
+        "2007-2011": "2007-present",
+        "2012 onwards": "2007-present",
+    }
+
+    # Mapping from age band to nominal construction year (mid-point)
+    age_band_to_year = {
+        "before 1900": 1890,
+        "1900-1929": 1915,
+        "1930-1949": 1940,
+        "1950-1966": 1958,
+        "1967-1975": 1971,
+        "1976-1982": 1979,
+        "1983-1990": 1987,
+        "1991-1995": 1993,
+        "1996-2002": 1999,
+        "2003-2006": 2005,
+        "2007-2011": 2009,
+        "2012 onwards": 2018,
+    }
+
     all_main_fuels = [
         "mains gas",
         "electricity",
@@ -554,6 +586,8 @@ def get_mock_epc_domestic_data(
                 "built_form": built_form,
                 "tenure": tenure,
                 "construction_age_band": age_band,
+                "construction_epoch": age_band_to_epoch[age_band],
+                "nominal_construction_year": age_band_to_year[age_band],
                 "main_fuel": main_fuel,
                 "total_floor_area": round(floor_area, 1),
                 "co2_emissions_current": round(co2_current, 2),
@@ -622,6 +656,8 @@ def load_epc_domestic_with_fallback(
             BUILT_FORM AS built_form,
             TENURE_CLEAN AS tenure,
             CONSTRUCTION_AGE_BAND AS construction_age_band,
+            CONSTRUCTION_EPOCH AS construction_epoch,
+            NOMINAL_CONSTRUCTION_YEAR AS nominal_construction_year,
             MAIN_FUEL AS main_fuel,
             TOTAL_FLOOR_AREA AS total_floor_area,
             CO2_EMISSIONS_CURRENT AS co2_emissions_current,

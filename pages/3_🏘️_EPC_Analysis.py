@@ -293,35 +293,16 @@ with st.spinner("Loading EPC data..."):
     with col1:
         st.markdown("### Properties by Construction Period")
 
-        age_counts = df.group_by("construction_age_band").agg(pl.len().alias("count"))
-
-        # Sort by approximate year
-        age_order = [
-            "before 1900",
-            "1900-1929",
-            "1930-1949",
-            "1950-1966",
-            "1967-1975",
-            "1976-1982",
-            "1983-1990",
-            "1991-1995",
-            "1996-2002",
-            "2003-2006",
-            "2007-2011",
-            "2012 onwards",
-        ]
-
-        # Create order mapping
-        order_map = {age: i for i, age in enumerate(age_order)}
-        age_counts = age_counts.with_columns(
-            pl.col("construction_age_band")
-            .map_elements(lambda x: order_map.get(x, 99), return_dtype=pl.Int64)
-            .alias("sort_order")
-        ).sort("sort_order")
+        # Use construction_epoch (cleaned/categorized) with nominal year for sorting
+        age_counts = (
+            df.group_by(["construction_epoch", "nominal_construction_year"])
+            .agg(pl.len().alias("count"))
+            .sort("nominal_construction_year")
+        )
 
         fig_age = create_bar_comparison(
             age_counts,
-            x="construction_age_band",
+            x="construction_epoch",
             y="count",
             title="Properties by Construction Period",
             x_label="Construction Period",
@@ -338,24 +319,20 @@ with st.spinner("Loading EPC data..."):
     with col2:
         st.markdown("### Energy Rating by Construction Period")
 
-        # Create heatmap of rating vs age (use long format data)
+        # Create heatmap of rating vs construction epoch (use long format data)
         age_rating = (
-            df.group_by(["construction_age_band", "current_energy_rating"])
-            .agg(pl.len().alias("count"))
-            .with_columns(
-                pl.col("construction_age_band")
-                .map_elements(lambda x: order_map.get(x, 99), return_dtype=pl.Int64)
-                .alias("sort_order")
+            df.group_by(
+                ["construction_epoch", "nominal_construction_year", "current_energy_rating"]
             )
-            .sort(["sort_order", "current_energy_rating"])
-            .drop("sort_order")
+            .agg(pl.len().alias("count"))
+            .sort(["nominal_construction_year", "current_energy_rating"])
         )
 
         if not age_rating.is_empty():
             fig_heatmap = create_heatmap(
                 age_rating,
                 x="current_energy_rating",
-                y="construction_age_band",
+                y="construction_epoch",
                 z="count",
                 title="Energy Rating Distribution by Construction Period",
                 x_label="Energy Rating",
