@@ -65,7 +65,11 @@ def sample_emissions_data() -> dict[str, list]:
             assert len(df) == 3
     """
     return {
-        "local_authority": ["Bristol", "Bath and North East Somerset", "South Gloucestershire"],
+        "local_authority": [
+            "Bristol",
+            "Bath and North East Somerset",
+            "South Gloucestershire",
+        ],
         "local_authority_code": ["E06000023", "E06000022", "E06000025"],
         "calendar_year": [2022, 2022, 2022],
         "grand_total": [2534.5, 1234.8, 1876.3],  # kt CO2e
@@ -114,6 +118,10 @@ def pytest_configure(config):
     Args:
         config: Pytest config object
     """
-    config.addinivalue_line("markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')")
+    config.addinivalue_line(
+        "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
+    )
     config.addinivalue_line("markers", "integration: marks tests as integration tests")
-    config.addinivalue_line("markers", "data_quality: marks tests that check data quality")
+    config.addinivalue_line(
+        "markers", "data_quality: marks tests that check data quality"
+    )

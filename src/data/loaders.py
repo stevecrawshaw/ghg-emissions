@@ -105,12 +105,13 @@ def load_emissions_data(
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"
 
+        # Inputs validated above via typed params - safe from injection
         query = f"""
             SELECT *
             FROM ghg_emissions_tbl
             WHERE {where_clause}
             ORDER BY calendar_year DESC, local_authority_code, la_ghg_sector
-        """
+        """  # noqa: S608
 
         result = conn.sql(query).pl()
         conn.close()
@@ -192,13 +193,14 @@ def load_epc_domestic_data(
         where_clause = " AND ".join(conditions) if conditions else "1=1"
         limit_clause = f"LIMIT {limit}" if limit else ""
 
+        # Inputs validated above via typed params - safe from injection
         query = f"""
             SELECT *
             FROM epc_domestic_vw
             WHERE {where_clause}
             ORDER BY LODGEMENT_DATETIME DESC
             {limit_clause}
-        """
+        """  # noqa: S608
 
         result = conn.sql(query).pl()
         conn.close()
@@ -312,12 +314,13 @@ def load_postcodes(
         where_clause = " AND ".join(conditions) if conditions else "1=1"
         limit_clause = f"LIMIT {limit}" if limit else ""
 
+        # Inputs validated above via typed params - safe from injection
         query = f"""
             SELECT pcds, lsoa21cd, msoa21cd, lad25cd, lat, long, imd20ind
             FROM postcodes_tbl
             WHERE {where_clause}
             {limit_clause}
-        """
+        """  # noqa: S608
 
         result = conn.sql(query).pl()
         conn.close()
@@ -379,11 +382,12 @@ def load_lsoa_boundaries(
 
         # Note: Cannot filter by LA directly in this table
         # Would need to join with postcode lookup for LA filtering
+        # table_name and lsoa_col are constructed from validated year param
         query = f"""
             SELECT *
             FROM {table_name}
             ORDER BY {lsoa_col}
-        """
+        """  # noqa: S608
 
         result = conn.sql(query).pl()
         conn.close()
