@@ -12,6 +12,7 @@ Features:
 - Data export functionality
 """
 
+import plotly.express as px
 import polars as pl
 import streamlit as st
 from dotenv import load_dotenv
@@ -294,10 +295,15 @@ with st.spinner("Loading EPC data..."):
         st.markdown("### Properties by Construction Period")
 
         # Use construction_epoch (cleaned/categorized) with nominal year for sorting
+        # Aggregate only by epoch to avoid subdivisions in bar chart
         age_counts = (
-            df.group_by(["construction_epoch", "nominal_construction_year"])
-            .agg(pl.len().alias("count"))
-            .sort("nominal_construction_year")
+            df.group_by("construction_epoch")
+            .agg(
+                pl.len().alias("count"),
+                pl.col("nominal_construction_year").first().alias("sort_year"),
+            )
+            .sort("sort_year")
+            .drop("sort_year")
         )
 
         fig_age = create_bar_comparison(
@@ -328,18 +334,37 @@ with st.spinner("Loading EPC data..."):
                 pl.col("nominal_construction_year").first().alias("sort_year"),
             )
             .sort(["sort_year", "current_energy_rating"])
-            .drop("sort_year")
         )
 
         if not age_rating.is_empty():
-            fig_heatmap = create_heatmap(
-                age_rating,
-                x="current_energy_rating",
-                y="construction_epoch",
-                z="count",
+            # Pivot for heatmap - keep sort_year for ordering y-axis
+            rating_order = ["A", "B", "C", "D", "E", "F", "G"]
+            epoch_order = (
+                age_rating.select(["construction_epoch", "sort_year"])
+                .unique()
+                .sort("sort_year")["construction_epoch"]
+                .to_list()
+            )
+
+            pivot_df = age_rating.pivot(
+                values="count", index="construction_epoch", on="current_energy_rating"
+            ).to_pandas()
+
+            # Reorder rows and columns
+            pivot_df = pivot_df.set_index("construction_epoch")
+            pivot_df = pivot_df.reindex(index=epoch_order)
+            rating_cols = [c for c in rating_order if c in pivot_df.columns]
+            pivot_df = pivot_df[rating_cols].fillna(0)
+
+            fig_heatmap = px.imshow(
+                pivot_df,
+                labels={"x": "Energy Rating", "y": "Construction Period", "color": "Count"},
+                aspect="auto",
+                color_continuous_scale="RdYlGn_r",
+            )
+            fig_heatmap.update_layout(
                 title="Energy Rating Distribution by Construction Period",
-                x_label="Energy Rating",
-                y_label="Construction Period",
+                height=400,
             )
 
             st.plotly_chart(fig_heatmap, width="stretch")
