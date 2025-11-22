@@ -111,6 +111,8 @@ def create_choropleth_map(
     nan_fill_color: str = "#CCCCCC",
     tiles: str = "CartoDB positron",
     height: str = "600px",
+    tooltip_fields: list[str] | None = None,
+    tooltip_aliases: list[str] | None = None,
 ) -> folium.Map:
     """Create a choropleth map showing values by geographic area.
 
@@ -133,6 +135,8 @@ def create_choropleth_map(
         nan_fill_color: Color for areas with no data (default: light gray)
         tiles: Base map tiles (default: CartoDB positron)
         height: Map height as CSS string
+        tooltip_fields: List of GeoJSON property fields to show in tooltip
+        tooltip_aliases: Display names for tooltip fields (same order as fields)
 
     Returns:
         Folium Map object
@@ -149,6 +153,8 @@ def create_choropleth_map(
         ...     value_col="territorial_emissions_kt_co2e",
         ...     legend_name="Emissions (kt CO2e)",
         ...     colorscale="sequential",
+        ...     tooltip_fields=["lsoa_name", "territorial_emissions_kt_co2e"],
+        ...     tooltip_aliases=["Area", "Emissions (kt CO2e)"],
         ... )
     """
     # Validate columns
@@ -194,7 +200,30 @@ def create_choropleth_map(
     if bins is not None:
         choropleth_kwargs["bins"] = bins
 
-    folium.Choropleth(**choropleth_kwargs).add_to(m)
+    choropleth = folium.Choropleth(**choropleth_kwargs)
+    choropleth.add_to(m)
+
+    # Add tooltips if specified
+    if tooltip_fields:
+        # Add tooltip to the GeoJson layer within the choropleth
+        aliases = tooltip_aliases if tooltip_aliases else tooltip_fields
+        tooltip = folium.GeoJsonTooltip(
+            fields=tooltip_fields,
+            aliases=aliases,
+            localize=True,
+            sticky=False,
+            labels=True,
+            style="""
+                background-color: white;
+                border: 2px solid #40A832;
+                border-radius: 3px;
+                box-shadow: 3px 3px 3px rgba(0,0,0,0.25);
+                font-size: 14px;
+                padding: 10px;
+            """,
+        )
+        # The geojson is stored in choropleth.geojson
+        choropleth.geojson.add_child(tooltip)
 
     # Add layer control
     folium.LayerControl().add_to(m)
