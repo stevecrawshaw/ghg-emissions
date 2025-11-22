@@ -492,7 +492,7 @@ st.markdown("## 📈 Emissions Trend Over Time")
 col1, col2 = st.columns(2)
 
 with col1:
-    # WECA vs England average time series
+    # WECA time series (only include England for per capita - totals not comparable)
     weca_ts = ca_df.filter(pl.col("ca_name") == "West of England").select(
         [
             pl.col("calendar_year"),
@@ -501,23 +501,30 @@ with col1:
         ]
     )
 
-    england_ts = england_df.select(
-        [
-            pl.col("calendar_year"),
-            pl.col(selected_metric),
-            pl.lit("England Average").alias("region"),
-        ]
-    )
-
-    # Combine for plotting
-    comparison_ts = pl.concat([weca_ts, england_ts]).sort(["region", "calendar_year"])
+    if selected_metric == "per_capita":
+        # England comparison only meaningful for per capita
+        england_ts = england_df.select(
+            [
+                pl.col("calendar_year"),
+                pl.col(selected_metric),
+                pl.lit("England Average").alias("region"),
+            ]
+        )
+        comparison_ts = pl.concat([weca_ts, england_ts]).sort(
+            ["region", "calendar_year"]
+        )
+        title = f"WECA vs England Average - {metrics[selected_metric]}"
+    else:
+        # For total emissions, just show WECA trend
+        comparison_ts = weca_ts.sort("calendar_year")
+        title = f"WECA Emissions Trend - {metrics[selected_metric]}"
 
     fig_trend = create_time_series(
         comparison_ts,
         x="calendar_year",
         y=selected_metric,
-        color="region",
-        title=f"WECA vs England Average - {metrics[selected_metric]}",
+        color="region" if selected_metric == "per_capita" else None,
+        title=title,
         x_label="Year",
         y_label=metrics[selected_metric],
         markers=True,
@@ -628,6 +635,7 @@ create_export_menu(
     base_filename=f"weca_ca_comparison_{selected_year}",
     formats=["csv", "parquet", "json", "excel"],
     key_prefix="insights_export",
+    show_heading=False,
 )
 
 # Footer note about data

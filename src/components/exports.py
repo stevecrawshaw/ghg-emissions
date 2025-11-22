@@ -390,6 +390,7 @@ def create_export_menu(
     base_filename: str,
     formats: list[str] | None = None,
     key_prefix: str = "export",
+    show_heading: bool = True,
 ) -> None:
     """Create a download menu with multiple export format options.
 
@@ -399,6 +400,7 @@ def create_export_menu(
         formats: List of formats to offer - ["csv", "parquet", "json", "excel"]
             (default: all formats)
         key_prefix: Prefix for widget keys to avoid conflicts
+        show_heading: Whether to show "Download Data" heading (default: True)
 
     Example:
         >>> create_export_menu(df, base_filename="emissions_2023")
@@ -406,7 +408,8 @@ def create_export_menu(
     if formats is None:
         formats = ["csv", "parquet", "json", "excel"]
 
-    st.markdown("### 📥 Download Data")
+    if show_heading:
+        st.markdown("### 📥 Download Data")
 
     col_count = len(formats)
     cols = st.columns(col_count)
