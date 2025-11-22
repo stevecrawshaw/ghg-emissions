@@ -607,48 +607,29 @@ def load_epc_domestic_with_fallback(
         conn.execute("INSTALL spatial; LOAD spatial;")
 
         # Build query with filters
-        # Note: epc_domestic_ods_vw has lowercase column names already aliased
-        # and doesn't include SAP efficiency scores, only letter ratings
+        # Use epc_domestic_vw which has actual SAP efficiency scores
+        # Filter to WECA local authorities
         query = """
         SELECT
-            lmk_key,
-            local_authority AS la_code,
-            ladnm AS la_name,
-            current_energy_rating,
-            potential_energy_rating,
-            property_type,
-            built_form,
-            tenure,
-            construction_age_band,
-            main_fuel,
-            total_floor_area,
-            co2_emissions_current,
-            co2_emissions_potential,
-            year AS lodgement_year,
-            CASE WHEN main_fuel = 'mains gas' THEN 'Y' ELSE 'N' END AS mains_gas_flag,
-            -- Derive SAP scores from ratings (approximate)
-            CASE current_energy_rating
-                WHEN 'A' THEN 95
-                WHEN 'B' THEN 85
-                WHEN 'C' THEN 75
-                WHEN 'D' THEN 60
-                WHEN 'E' THEN 45
-                WHEN 'F' THEN 30
-                WHEN 'G' THEN 15
-                ELSE NULL
-            END AS current_energy_efficiency,
-            CASE potential_energy_rating
-                WHEN 'A' THEN 95
-                WHEN 'B' THEN 85
-                WHEN 'C' THEN 75
-                WHEN 'D' THEN 60
-                WHEN 'E' THEN 45
-                WHEN 'F' THEN 30
-                WHEN 'G' THEN 15
-                ELSE NULL
-            END AS potential_energy_efficiency
-        FROM mca_data.epc_domestic_ods_vw
-        WHERE 1=1
+            LMK_KEY AS lmk_key,
+            LOCAL_AUTHORITY AS la_code,
+            LOCAL_AUTHORITY_LABEL AS la_name,
+            CURRENT_ENERGY_RATING AS current_energy_rating,
+            POTENTIAL_ENERGY_RATING AS potential_energy_rating,
+            CURRENT_ENERGY_EFFICIENCY AS current_energy_efficiency,
+            POTENTIAL_ENERGY_EFFICIENCY AS potential_energy_efficiency,
+            PROPERTY_TYPE AS property_type,
+            BUILT_FORM AS built_form,
+            TENURE_CLEAN AS tenure,
+            CONSTRUCTION_AGE_BAND AS construction_age_band,
+            MAIN_FUEL AS main_fuel,
+            TOTAL_FLOOR_AREA AS total_floor_area,
+            CO2_EMISSIONS_CURRENT AS co2_emissions_current,
+            CO2_EMISSIONS_POTENTIAL AS co2_emissions_potential,
+            LODGEMENT_YEAR AS lodgement_year,
+            MAINS_GAS_FLAG AS mains_gas_flag
+        FROM mca_data.epc_domestic_vw
+        WHERE LOCAL_AUTHORITY IN ('E06000022', 'E06000023', 'E06000025', 'E06000024')
         """
 
         params = []
@@ -663,22 +644,22 @@ def load_epc_domestic_with_fallback(
             }
             la_codes = [la_mapping.get(la, la) for la in local_authorities]
             placeholders = ", ".join(["?" for _ in la_codes])
-            query += f" AND local_authority IN ({placeholders})"
+            query += f" AND LOCAL_AUTHORITY IN ({placeholders})"
             params.extend(la_codes)
 
         if energy_ratings:
             placeholders = ", ".join(["?" for _ in energy_ratings])
-            query += f" AND current_energy_rating IN ({placeholders})"
+            query += f" AND CURRENT_ENERGY_RATING IN ({placeholders})"
             params.extend(energy_ratings)
 
         if property_types:
             placeholders = ", ".join(["?" for _ in property_types])
-            query += f" AND property_type IN ({placeholders})"
+            query += f" AND PROPERTY_TYPE IN ({placeholders})"
             params.extend(property_types)
 
         if tenures:
             placeholders = ", ".join(["?" for _ in tenures])
-            query += f" AND tenure IN ({placeholders})"
+            query += f" AND TENURE_CLEAN IN ({placeholders})"
             params.extend(tenures)
 
         df = conn.execute(query, params).pl()
