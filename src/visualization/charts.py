@@ -741,11 +741,12 @@ def create_donut_chart(
         ]
     )
 
-    # Update layout
+    # Update layout - exclude title from template to avoid conflict
+    layout_kwargs = {k: v for k, v in template["layout"].items() if k != "title"}
     fig.update_layout(
         title=title,
         height=height,
-        **template["layout"],
+        **layout_kwargs,
     )
 
     return fig

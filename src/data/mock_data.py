@@ -607,6 +607,8 @@ def load_epc_domestic_with_fallback(
         conn.execute("INSTALL spatial; LOAD spatial;")
 
         # Build query with filters
+        # Note: epc_domestic_ods_vw has lowercase column names already aliased
+        # and doesn't include SAP efficiency scores, only letter ratings
         query = """
         SELECT
             lmk_key,
@@ -614,10 +616,8 @@ def load_epc_domestic_with_fallback(
             ladnm AS la_name,
             current_energy_rating,
             potential_energy_rating,
-            CURRENT_ENERGY_EFFICIENCY AS current_energy_efficiency,
-            POTENTIAL_ENERGY_EFFICIENCY AS potential_energy_efficiency,
             property_type,
-            BUILT_FORM AS built_form,
+            built_form,
             tenure,
             construction_age_band,
             main_fuel,
@@ -625,7 +625,28 @@ def load_epc_domestic_with_fallback(
             co2_emissions_current,
             co2_emissions_potential,
             year AS lodgement_year,
-            MAINS_GAS_FLAG AS mains_gas_flag
+            CASE WHEN main_fuel = 'mains gas' THEN 'Y' ELSE 'N' END AS mains_gas_flag,
+            -- Derive SAP scores from ratings (approximate)
+            CASE current_energy_rating
+                WHEN 'A' THEN 95
+                WHEN 'B' THEN 85
+                WHEN 'C' THEN 75
+                WHEN 'D' THEN 60
+                WHEN 'E' THEN 45
+                WHEN 'F' THEN 30
+                WHEN 'G' THEN 15
+                ELSE NULL
+            END AS current_energy_efficiency,
+            CASE potential_energy_rating
+                WHEN 'A' THEN 95
+                WHEN 'B' THEN 85
+                WHEN 'C' THEN 75
+                WHEN 'D' THEN 60
+                WHEN 'E' THEN 45
+                WHEN 'F' THEN 30
+                WHEN 'G' THEN 15
+                ELSE NULL
+            END AS potential_energy_efficiency
         FROM mca_data.epc_domestic_ods_vw
         WHERE 1=1
         """
