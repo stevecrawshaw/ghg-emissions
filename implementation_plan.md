@@ -3,7 +3,7 @@
 **Project**: West of England Combined Authority GHG Emissions Dashboard
 **Stage**: Exploratory/Prototyping → Production
 **Last Updated**: 2025-11-22
-**Status**: 🟢 Phase 4.6 (Choropleth Map) In Progress
+**Status**: 🟢 Phase 4.6 (Choropleth Map) Complete
 
 ---
 
@@ -13,12 +13,12 @@
 Phase 1: Foundation & Setup          [████████████████████████] 100% ✅
 Phase 2: Data Layer                  [████████████████████████] 100% ✅
 Phase 3: Visualization Components    [████████████████████████] 100% ✅
-Phase 4: Dashboard Pages             [██████████████████████──]  95% 🚧
+Phase 4: Dashboard Pages             [████████████████████████] 100% ✅
 Phase 5: Testing & Quality           [────────────────────────]   0% ⏳
 Phase 6: Deployment Preparation      [────────────────────────]   0% ⏳
 ```
 
-**Overall Progress**: 73% (Phases 1-3 complete, Phase 4.6 in progress)
+**Overall Progress**: 80% (Phases 1-4 complete, Phase 5 Testing next)
 
 ---
 
@@ -328,18 +328,18 @@ Phase 6: Deployment Preparation      [──────────────
 - Color-coded performance indicators (green for WECA, grey for others)
 - Year selector (2014-2023) with per capita/total metric toggle
 
-#### 4.6: Geographic Choropleth Enhancement ⏳ IN PROGRESS
-- [ ] Add choropleth map to Geographic Analysis page
-  - [ ] Query CA boundaries from `ca_boundaries_bgc_tbl` using DuckDB SPATIAL extension
-  - [ ] Convert geometry to GeoJSON format with `ST_AsGeoJSON()`
-  - [ ] Join boundary data with emissions data (per capita, total, per km²)
-  - [ ] Use existing `create_choropleth_map()` from maps.py
-  - [ ] Add CA-level choropleth showing all UK Combined Authorities
-  - [ ] Color scale based on emissions metric
-  - [ ] Interactive tooltips with CA name and emissions value
-- [ ] Optional: Add LSOA-level choropleth for WECA region only
-  - [ ] Use `lsoa_poly_2021_tbl` for boundaries
-  - [ ] Link to emissions data via LA lookup
+#### 4.6: Geographic Choropleth Enhancement ✅ COMPLETE
+- [x] Add choropleth map to Geographic Analysis page
+  - [x] Query CA boundaries from `ca_boundaries_bgc_tbl` using DuckDB SPATIAL extension
+  - [x] Convert geometry to GeoJSON format with `ST_AsGeoJSON()`
+  - [x] Join boundary data with emissions data (per capita, total)
+  - [x] Use existing `create_choropleth_map()` from maps.py
+  - [x] Add CA-level choropleth showing all UK Combined Authorities
+  - [x] Color scale based on emissions metric
+  - [x] Interactive tooltips with CA name and emissions value
+  - [x] Summary statistics (avg, min, max, WECA value)
+  - [x] Full rankings table with WECA position highlighted
+- [x] Skipped LSOA-level choropleth (emissions data only at LA level)
 
 **Technical Approach**:
 - Use DuckDB SPATIAL extension: `INSTALL spatial; LOAD spatial;`
