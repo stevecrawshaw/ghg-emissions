@@ -511,6 +511,14 @@ uv add pytest-cov --group dev
 
 ---
 
+## Known Issues
+
+| Issue | Page | Status | Notes |
+|-------|------|--------|-------|
+| EPC construction dates incorrect in source data | EPC Analysis | 🔴 Open | Need to resolve construction date mapping in MotherDuck source data |
+
+---
+
 ## Notes & Decisions
 
 ### Architecture Decisions
