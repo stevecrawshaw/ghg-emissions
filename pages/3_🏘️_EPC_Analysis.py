@@ -338,39 +338,28 @@ with st.spinner("Loading EPC data..."):
     with col2:
         st.markdown("### Energy Rating by Construction Period")
 
-        # Create heatmap of rating vs age
-        age_rating = df.group_by(
-            ["construction_age_band", "current_energy_rating"]
-        ).agg(pl.len().alias("count"))
-
-        # Pivot for heatmap
-        age_rating_pivot = age_rating.pivot(
-            on="current_energy_rating",
-            index="construction_age_band",
-            values="count",
-        ).fill_null(0)
-
-        # Sort by construction period
-        if "construction_age_band" in age_rating_pivot.columns:
-            age_rating_pivot = (
-                age_rating_pivot.with_columns(
-                    pl.col("construction_age_band")
-                    .map_elements(lambda x: order_map.get(x, 99), return_dtype=pl.Int64)
-                    .alias("sort_order")
-                )
-                .sort("sort_order")
-                .drop("sort_order")
+        # Create heatmap of rating vs age (use long format data)
+        age_rating = (
+            df.group_by(["construction_age_band", "current_energy_rating"])
+            .agg(pl.len().alias("count"))
+            .with_columns(
+                pl.col("construction_age_band")
+                .map_elements(lambda x: order_map.get(x, 99), return_dtype=pl.Int64)
+                .alias("sort_order")
             )
+            .sort(["sort_order", "current_energy_rating"])
+            .drop("sort_order")
+        )
 
-        if not age_rating_pivot.is_empty():
+        if not age_rating.is_empty():
             fig_heatmap = create_heatmap(
-                age_rating_pivot,
-                x_cols=[c for c in all_ratings if c in age_rating_pivot.columns],
-                y_col="construction_age_band",
+                age_rating,
+                x="current_energy_rating",
+                y="construction_age_band",
+                z="count",
                 title="Energy Rating Distribution by Construction Period",
                 x_label="Energy Rating",
                 y_label="Construction Period",
-                template="weca",
             )
 
             st.plotly_chart(fig_heatmap, width="stretch")
@@ -436,7 +425,7 @@ with st.spinner("Loading EPC data..."):
     with col1:
         st.markdown("### Current vs Potential Rating")
 
-        # Calculate improvement potential
+        # Calculate improvement potential (use long format data)
         improvement = (
             df.group_by(["current_energy_rating", "potential_energy_rating"])
             .agg(pl.len().alias("count"))
@@ -444,21 +433,14 @@ with st.spinner("Loading EPC data..."):
         )
 
         if not improvement.is_empty():
-            # Pivot for heatmap
-            improvement_pivot = improvement.pivot(
-                on="potential_energy_rating",
-                index="current_energy_rating",
-                values="count",
-            ).fill_null(0)
-
             fig_improvement = create_heatmap(
-                improvement_pivot,
-                x_cols=[c for c in all_ratings if c in improvement_pivot.columns],
-                y_col="current_energy_rating",
+                improvement,
+                x="potential_energy_rating",
+                y="current_energy_rating",
+                z="count",
                 title="Current Rating (rows) vs Potential Rating (columns)",
                 x_label="Potential Rating",
                 y_label="Current Rating",
-                template="weca",
             )
 
             st.plotly_chart(fig_improvement, width="stretch")
