@@ -37,8 +37,6 @@ from src.visualization.themes import (
     SOFT_GREEN,
     WEST_GREEN,
     WHITE,
-    get_diverging_colorscale,
-    get_sequential_colorscale,
 )
 
 
@@ -165,11 +163,14 @@ def create_choropleth_map(
         center=center, zoom_start=zoom_start, tiles=tiles, height=height
     )
 
-    # Get color scale
+    # Get ColorBrewer color code for Folium
+    # Folium expects ColorBrewer codes, not RGB values
     if colorscale == "sequential":
-        colors = get_sequential_colorscale("green", n_colors=9, reverse=reverse_colors)
+        # Use green-based sequential scale (matches WECA branding)
+        fill_color_code = "YlGn" if not reverse_colors else "GnBu"
     elif colorscale == "diverging":
-        colors = get_diverging_colorscale(n_colors=11, reverse=reverse_colors)
+        # Use red-green diverging scale
+        fill_color_code = "RdYlGn" if not reverse_colors else "RdYlGn_r"
     else:
         msg = f"Invalid colorscale '{colorscale}'. Must be 'sequential' or 'diverging'"
         raise MapError(msg, map_type="choropleth")
@@ -183,7 +184,7 @@ def create_choropleth_map(
         data=df_pandas,
         columns=[location_col, value_col],
         key_on=f"feature.properties.{location_col}",
-        fill_color=colors[0] if isinstance(colors, list) else "YlGn",
+        fill_color=fill_color_code,
         fill_opacity=0.7,
         line_opacity=0.2,
         legend_name=legend_name,
