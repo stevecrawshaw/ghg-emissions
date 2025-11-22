@@ -225,15 +225,14 @@ def get_table_info(
         # Query information schema for columns
         # Note: Table names in WHERE clauses cannot be parameterized,
         # but we've validated the input above to prevent injection
-        result = conn.sql(
-            f"""  # noqa: S608
+        query = f"""
             SELECT column_name, data_type
             FROM information_schema.columns
             WHERE table_name = '{table_name}'
             AND table_schema = 'main'
             ORDER BY ordinal_position
-            """
-        ).fetchall()
+        """  # noqa: S608
+        result = conn.sql(query).fetchall()
 
         if close_after:
             conn.close()

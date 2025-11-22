@@ -118,7 +118,7 @@ class TestLoadEmissionsData:
         mock_get_connection.return_value = mock_conn
         mock_st.cache_data = lambda **kwargs: lambda f: f
 
-        result = load_emissions_data(sectors=["Transport"])
+        load_emissions_data(sectors=["Transport"])
 
         call_args = mock_conn.sql.call_args[0][0]
         assert "la_ghg_sector IN" in call_args
@@ -169,7 +169,7 @@ class TestLoadEPCDomesticData:
         mock_get_connection.return_value = mock_conn
         mock_st.cache_data = lambda **kwargs: lambda f: f
 
-        result = load_epc_domestic_data(
+        load_epc_domestic_data(
             property_types=["House"],
             energy_ratings=["D", "E"],
         )
@@ -190,7 +190,7 @@ class TestLoadEPCDomesticData:
         mock_get_connection.return_value = mock_conn
         mock_st.cache_data = lambda **kwargs: lambda f: f
 
-        result = load_epc_domestic_data(limit=100)
+        load_epc_domestic_data(limit=100)
 
         call_args = mock_conn.sql.call_args[0][0]
         assert "LIMIT 100" in call_args
@@ -264,7 +264,7 @@ class TestLoadPostcodes:
         mock_get_connection.return_value = mock_conn
         mock_st.cache_data = lambda **kwargs: lambda f: f
 
-        result = load_postcodes(local_authorities=["E06000023"], limit=1000)
+        load_postcodes(local_authorities=["E06000023"], limit=1000)
 
         call_args = mock_conn.sql.call_args[0][0]
         assert "lad25cd IN" in call_args
@@ -311,7 +311,7 @@ class TestLoadLSOABoundaries:
         mock_st.cache_data = lambda **kwargs: lambda f: f
         mock_st.info = MagicMock()
 
-        result = load_lsoa_boundaries(year=2011)
+        load_lsoa_boundaries(year=2011)
 
         call_args = mock_conn.sql.call_args[0][0]
         assert "lsoa_poly_2011_tbl" in call_args

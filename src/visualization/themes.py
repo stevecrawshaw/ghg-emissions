@@ -14,8 +14,12 @@ Example:
     >>> fig.update_layout(template=get_plotly_template())
     >>>
     >>> # Use WECA colors
-    >>> fig = px.bar(df, x="sector", y="emissions",
-    ...              color_discrete_sequence=WECA_COLORS["primary"])
+    >>> fig = px.bar(
+    ...     df,
+    ...     x="sector",
+    ...     y="emissions",
+    ...     color_discrete_sequence=WECA_COLORS["primary"],
+    ... )
 """
 
 from typing import Any
@@ -185,8 +189,9 @@ def get_sequential_colorscale(
     Example:
         >>> colors = get_sequential_colorscale("green", n_colors=5)
         >>> import plotly.express as px
-        >>> fig = px.choropleth(df, locations="code", color="emissions",
-        ...                     color_continuous_scale=colors)
+        >>> fig = px.choropleth(
+        ...     df, locations="code", color="emissions", color_continuous_scale=colors
+        ... )
     """
     import plotly.express as px
 
@@ -238,8 +243,9 @@ def get_diverging_colorscale(
         >>> colors = get_diverging_colorscale(n_colors=11)
         >>> import plotly.express as px
         >>> # Show emissions change from baseline
-        >>> fig = px.choropleth(df, locations="code", color="change_pct",
-        ...                     color_continuous_scale=colors)
+        >>> fig = px.choropleth(
+        ...     df, locations="code", color="change_pct", color_continuous_scale=colors
+        ... )
     """
     import plotly.express as px
 
@@ -275,8 +281,13 @@ def get_categorical_colors(n_colors: int | None = None) -> list[str]:
     Example:
         >>> colors = get_categorical_colors(n_colors=4)
         >>> import plotly.express as px
-        >>> fig = px.bar(df, x="sector", y="emissions",
-        ...              color="sector", color_discrete_sequence=colors)
+        >>> fig = px.bar(
+        ...     df,
+        ...     x="sector",
+        ...     y="emissions",
+        ...     color="sector",
+        ...     color_discrete_sequence=colors,
+        ... )
     """
     colors = WECA_COLORS["categorical"]
 

@@ -53,6 +53,14 @@ fixable = ["ALL"]
 unfixable = []
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[lint.per-file-ignores]
+# Allow assert in tests
+"tests/**/*.py" = ["S101"]
+# Allow random in mock data (not cryptographic)
+"src/data/mock_data.py" = ["S311"]
+# Ignore claude-ignore folder (scratch/exploratory code)
+"claude-ignore/**/*.py" = ["S608", "W291", "S311"]
+
 [format]
 quote-style = "double"
 indent-style = "space"
