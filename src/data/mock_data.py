@@ -350,3 +350,335 @@ def load_local_authorities_with_fallback() -> tuple[pl.DataFrame, bool]:
         # Fall back to mock data (warning already shown by emissions loader)
         df = get_mock_local_authorities()
         return df, True  # Mock data
+
+
+# =============================================================================
+# EPC Mock Data Generators
+# =============================================================================
+
+
+def get_mock_epc_domestic_data(
+    local_authorities: list[str] | None = None,
+    energy_ratings: list[str] | None = None,
+    property_types: list[str] | None = None,
+    tenures: list[str] | None = None,
+    sample_size: int = 5000,
+) -> pl.DataFrame:
+    """Generate mock domestic EPC data matching the schema.
+
+    Args:
+        local_authorities: Filter to specific LA names
+        energy_ratings: Filter to specific energy ratings (A-G)
+        property_types: Filter to specific property types
+        tenures: Filter to specific tenure types
+        sample_size: Number of records to generate
+
+    Returns:
+        DataFrame with mock EPC domestic data
+    """
+    import random
+
+    # LA mapping (name to code)
+    la_mapping = {
+        "Bath and North East Somerset": "E06000022",
+        "Bristol": "E06000023",
+        "South Gloucestershire": "E06000025",
+        "North Somerset": "E06000024",
+    }
+
+    # Filter LAs
+    if local_authorities:
+        las = {k: v for k, v in la_mapping.items() if k in local_authorities}
+    else:
+        las = la_mapping
+
+    # Distributions based on typical UK EPC data
+    all_ratings = ["A", "B", "C", "D", "E", "F", "G"]
+    rating_weights = [0.02, 0.12, 0.35, 0.32, 0.12, 0.05, 0.02]  # Realistic UK dist
+
+    all_property_types = ["House", "Flat", "Bungalow", "Maisonette", "Park home"]
+    property_weights = [0.55, 0.30, 0.10, 0.04, 0.01]
+
+    all_built_forms = [
+        "Detached",
+        "Semi-Detached",
+        "Mid-Terrace",
+        "End-Terrace",
+        "Enclosed Mid-Terrace",
+        "Enclosed End-Terrace",
+    ]
+    built_form_weights = [0.22, 0.28, 0.22, 0.15, 0.08, 0.05]
+
+    all_tenures = ["Owner occupied", "Private rented", "Social rented"]
+    tenure_weights = [0.63, 0.20, 0.17]
+
+    all_age_bands = [
+        "before 1900",
+        "1900-1929",
+        "1930-1949",
+        "1950-1966",
+        "1967-1975",
+        "1976-1982",
+        "1983-1990",
+        "1991-1995",
+        "1996-2002",
+        "2003-2006",
+        "2007-2011",
+        "2012 onwards",
+    ]
+    age_band_weights = [
+        0.08,
+        0.10,
+        0.12,
+        0.15,
+        0.10,
+        0.08,
+        0.08,
+        0.06,
+        0.08,
+        0.05,
+        0.05,
+        0.05,
+    ]
+
+    all_main_fuels = [
+        "mains gas",
+        "electricity",
+        "oil",
+        "LPG",
+        "solid fuel",
+        "biomass",
+    ]
+    fuel_weights = [0.78, 0.12, 0.05, 0.02, 0.02, 0.01]
+
+    # SAP rating ranges by energy band
+    sap_ranges = {
+        "A": (92, 100),
+        "B": (81, 91),
+        "C": (69, 80),
+        "D": (55, 68),
+        "E": (39, 54),
+        "F": (21, 38),
+        "G": (1, 20),
+    }
+
+    # Generate mock data
+    rows = []
+    random.seed(42)  # Reproducible
+
+    for i in range(sample_size):
+        # Select LA with weighted distribution (Bristol larger)
+        la_names = list(las.keys())
+        la_weights = [0.40, 0.25, 0.20, 0.15][: len(la_names)]
+        la_name = random.choices(la_names, weights=la_weights)[0]
+        la_code = las[la_name]
+
+        # Select current energy rating
+        if energy_ratings:
+            current_rating = random.choice(
+                [r for r in all_ratings if r in energy_ratings]
+            )
+        else:
+            current_rating = random.choices(all_ratings, weights=rating_weights)[0]
+
+        # Potential rating is same or better
+        current_idx = all_ratings.index(current_rating)
+        potential_idx = max(0, current_idx - random.randint(0, 2))
+        potential_rating = all_ratings[potential_idx]
+
+        # SAP scores
+        current_sap = random.randint(*sap_ranges[current_rating])
+        potential_sap = random.randint(*sap_ranges[potential_rating])
+
+        # Property type
+        if property_types:
+            prop_type = random.choice(
+                [p for p in all_property_types if p in property_types]
+            )
+        else:
+            prop_type = random.choices(all_property_types, weights=property_weights)[0]
+
+        # Built form (correlate with property type)
+        if prop_type == "Flat":
+            built_form = random.choice(
+                ["Enclosed Mid-Terrace", "Enclosed End-Terrace", "Mid-Terrace"]
+            )
+        elif prop_type == "Bungalow":
+            built_form = random.choice(["Detached", "Semi-Detached"])
+        else:
+            built_form = random.choices(all_built_forms, weights=built_form_weights)[0]
+
+        # Tenure
+        if tenures:
+            tenure = random.choice([t for t in all_tenures if t in tenures])
+        else:
+            tenure = random.choices(all_tenures, weights=tenure_weights)[0]
+
+        # Construction age band
+        age_band = random.choices(all_age_bands, weights=age_band_weights)[0]
+
+        # Main fuel
+        main_fuel = random.choices(all_main_fuels, weights=fuel_weights)[0]
+
+        # Floor area (correlate with property type)
+        if prop_type == "Flat":
+            floor_area = random.uniform(35, 85)
+        elif prop_type == "Bungalow":
+            floor_area = random.uniform(50, 120)
+        elif prop_type == "Maisonette":
+            floor_area = random.uniform(55, 100)
+        else:  # House
+            floor_area = random.uniform(60, 200)
+
+        # CO2 emissions (correlate with SAP and floor area)
+        co2_factor = (100 - current_sap) / 50  # Higher SAP = lower emissions
+        co2_current = floor_area * co2_factor * random.uniform(0.03, 0.06)
+        co2_potential = (
+            floor_area * ((100 - potential_sap) / 50) * random.uniform(0.025, 0.045)
+        )
+
+        # Lodgement year (weighted towards recent years)
+        year_weights = [0.05, 0.08, 0.10, 0.12, 0.15, 0.20, 0.30]
+        lodgement_year = random.choices(range(2018, 2025), weights=year_weights)[0]
+
+        rows.append(
+            {
+                "lmk_key": f"MOCK-{i:08d}",
+                "la_code": la_code,
+                "la_name": la_name,
+                "current_energy_rating": current_rating,
+                "potential_energy_rating": potential_rating,
+                "current_energy_efficiency": current_sap,
+                "potential_energy_efficiency": potential_sap,
+                "property_type": prop_type,
+                "built_form": built_form,
+                "tenure": tenure,
+                "construction_age_band": age_band,
+                "main_fuel": main_fuel,
+                "total_floor_area": round(floor_area, 1),
+                "co2_emissions_current": round(co2_current, 2),
+                "co2_emissions_potential": round(co2_potential, 2),
+                "lodgement_year": lodgement_year,
+                "mains_gas_flag": "Y" if main_fuel == "mains gas" else "N",
+            }
+        )
+
+    return pl.DataFrame(rows)
+
+
+def get_epc_rating_distribution() -> dict[str, list[float]]:
+    """Get typical UK EPC rating distribution for reference.
+
+    Returns:
+        Dictionary with rating distribution percentages
+    """
+    return {
+        "ratings": ["A", "B", "C", "D", "E", "F", "G"],
+        "percentages": [2.0, 12.0, 35.0, 32.0, 12.0, 5.0, 2.0],
+    }
+
+
+def load_epc_domestic_with_fallback(
+    local_authorities: list[str] | None = None,
+    energy_ratings: list[str] | None = None,
+    property_types: list[str] | None = None,
+    tenures: list[str] | None = None,
+) -> tuple[pl.DataFrame, bool]:
+    """Load domestic EPC data with automatic fallback to mock data.
+
+    Args:
+        local_authorities: Filter to specific LA names
+        energy_ratings: Filter to specific energy ratings (A-G)
+        property_types: Filter to specific property types
+        tenures: Filter to specific tenure types
+
+    Returns:
+        Tuple of (DataFrame, is_mock_data_boolean)
+    """
+    from src.data.connections import MotherDuckConnectionError
+
+    try:
+        # Try to load real data from MotherDuck
+        from src.data.connections import get_connection
+
+        conn = get_connection()
+
+        # Build query with filters
+        query = """
+        SELECT
+            lmk_key,
+            local_authority AS la_code,
+            ladnm AS la_name,
+            current_energy_rating,
+            potential_energy_rating,
+            CURRENT_ENERGY_EFFICIENCY AS current_energy_efficiency,
+            POTENTIAL_ENERGY_EFFICIENCY AS potential_energy_efficiency,
+            property_type,
+            BUILT_FORM AS built_form,
+            tenure,
+            construction_age_band,
+            main_fuel,
+            total_floor_area,
+            co2_emissions_current,
+            co2_emissions_potential,
+            year AS lodgement_year,
+            MAINS_GAS_FLAG AS mains_gas_flag
+        FROM mca_data.epc_domestic_ods_vw
+        WHERE 1=1
+        """
+
+        params = []
+
+        if local_authorities:
+            # Convert names to codes if needed
+            la_mapping = {
+                "Bath and North East Somerset": "E06000022",
+                "Bristol": "E06000023",
+                "South Gloucestershire": "E06000025",
+                "North Somerset": "E06000024",
+            }
+            la_codes = [la_mapping.get(la, la) for la in local_authorities]
+            placeholders = ", ".join(["?" for _ in la_codes])
+            query += f" AND local_authority IN ({placeholders})"
+            params.extend(la_codes)
+
+        if energy_ratings:
+            placeholders = ", ".join(["?" for _ in energy_ratings])
+            query += f" AND current_energy_rating IN ({placeholders})"
+            params.extend(energy_ratings)
+
+        if property_types:
+            placeholders = ", ".join(["?" for _ in property_types])
+            query += f" AND property_type IN ({placeholders})"
+            params.extend(property_types)
+
+        if tenures:
+            placeholders = ", ".join(["?" for _ in tenures])
+            query += f" AND tenure IN ({placeholders})"
+            params.extend(tenures)
+
+        df = conn.execute(query, params).pl()
+        return df, False  # Real data
+
+    except (MotherDuckConnectionError, Exception) as e:
+        # Fall back to mock data
+        st.warning(
+            f"""
+            ### ⚠️ Using Mock EPC Data
+
+            **Database connection failed**: {e!s}
+
+            Showing sample WECA EPC data for development.
+            The dashboard is fully functional but using mock data.
+
+            **To use real data**: Ensure MotherDuck is available and `.env` has a
+            valid `MOTHERDUCK_TOKEN`, then refresh.
+            """
+        )
+        df = get_mock_epc_domestic_data(
+            local_authorities=local_authorities,
+            energy_ratings=energy_ratings,
+            property_types=property_types,
+            tenures=tenures,
+        )
+        return df, True  # Mock data
