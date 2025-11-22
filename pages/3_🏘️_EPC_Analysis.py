@@ -320,12 +320,15 @@ with st.spinner("Loading EPC data..."):
         st.markdown("### Energy Rating by Construction Period")
 
         # Create heatmap of rating vs construction epoch (use long format data)
+        # Aggregate by epoch and rating, use a representative year for sorting
         age_rating = (
-            df.group_by(
-                ["construction_epoch", "nominal_construction_year", "current_energy_rating"]
+            df.group_by(["construction_epoch", "current_energy_rating"])
+            .agg(
+                pl.len().alias("count"),
+                pl.col("nominal_construction_year").first().alias("sort_year"),
             )
-            .agg(pl.len().alias("count"))
-            .sort(["nominal_construction_year", "current_energy_rating"])
+            .sort(["sort_year", "current_energy_rating"])
+            .drop("sort_year")
         )
 
         if not age_rating.is_empty():
