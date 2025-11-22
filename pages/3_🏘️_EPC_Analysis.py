@@ -214,7 +214,7 @@ with st.spinner("Loading EPC data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_ratings, use_container_width=True)
+        st.plotly_chart(fig_ratings, width="stretch")
 
     with col2:
         st.markdown("### Rating Distribution by LA")
@@ -238,7 +238,7 @@ with st.spinner("Loading EPC data..."):
                 template="weca",
             )
 
-            st.plotly_chart(fig_la_ratings, use_container_width=True)
+            st.plotly_chart(fig_la_ratings, width="stretch")
 
     st.markdown("---")
 
@@ -261,10 +261,9 @@ with st.spinner("Loading EPC data..."):
             values="count",
             names="property_type",
             title="Properties by Type",
-            template="weca",
         )
 
-        st.plotly_chart(fig_property, use_container_width=True)
+        st.plotly_chart(fig_property, width="stretch")
 
     with col2:
         st.markdown("### Tenure Distribution")
@@ -280,10 +279,9 @@ with st.spinner("Loading EPC data..."):
             values="count",
             names="tenure",
             title="Properties by Tenure",
-            template="weca",
         )
 
-        st.plotly_chart(fig_tenure, use_container_width=True)
+        st.plotly_chart(fig_tenure, width="stretch")
 
     st.markdown("---")
 
@@ -335,7 +333,7 @@ with st.spinner("Loading EPC data..."):
         # Rotate x-axis labels
         fig_age.update_layout(xaxis_tickangle=-45)
 
-        st.plotly_chart(fig_age, use_container_width=True)
+        st.plotly_chart(fig_age, width="stretch")
 
     with col2:
         st.markdown("### Energy Rating by Construction Period")
@@ -375,7 +373,7 @@ with st.spinner("Loading EPC data..."):
                 template="weca",
             )
 
-            st.plotly_chart(fig_heatmap, use_container_width=True)
+            st.plotly_chart(fig_heatmap, width="stretch")
 
     st.markdown("---")
 
@@ -404,7 +402,7 @@ with st.spinner("Loading EPC data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_fuel, use_container_width=True)
+        st.plotly_chart(fig_fuel, width="stretch")
 
     with col2:
         st.markdown("### Mains Gas Connection")
@@ -424,10 +422,9 @@ with st.spinner("Loading EPC data..."):
             values="count",
             names="gas_status",
             title="Mains Gas Connection",
-            template="weca",
         )
 
-        st.plotly_chart(fig_gas, use_container_width=True)
+        st.plotly_chart(fig_gas, width="stretch")
 
     st.markdown("---")
 
@@ -464,7 +461,7 @@ with st.spinner("Loading EPC data..."):
                 template="weca",
             )
 
-            st.plotly_chart(fig_improvement, use_container_width=True)
+            st.plotly_chart(fig_improvement, width="stretch")
 
     with col2:
         st.markdown("### CO2 Savings Potential")
@@ -495,7 +492,7 @@ with st.spinner("Loading EPC data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_savings, use_container_width=True)
+        st.plotly_chart(fig_savings, width="stretch")
 
     st.markdown("---")
 
