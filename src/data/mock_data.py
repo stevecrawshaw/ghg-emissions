@@ -603,6 +603,9 @@ def load_epc_domestic_with_fallback(
 
         conn = get_connection()
 
+        # Load spatial extension (required for epc_domestic_ods_vw which uses st_astext)
+        conn.execute("INSTALL spatial; LOAD spatial;")
+
         # Build query with filters
         query = """
         SELECT
