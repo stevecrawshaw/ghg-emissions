@@ -193,6 +193,25 @@ try:
     center = (52.5, -1.5)
     zoom = 6
 
+    # Enrich GeoJSON features with emissions data for tooltips
+    emissions_lookup = {
+        row["ca_code"]: {
+            "per_capita": row["per_capita"],
+            "total_emissions": row["total_emissions"],
+        }
+        for row in merged_df.iter_rows(named=True)
+    }
+
+    for feature in geojson_data["features"]:
+        ca_code = feature["properties"]["ca_code"]
+        if ca_code in emissions_lookup:
+            feature["properties"]["per_capita"] = round(
+                emissions_lookup[ca_code]["per_capita"], 1
+            )
+            feature["properties"]["total_emissions"] = round(
+                emissions_lookup[ca_code]["total_emissions"], 1
+            )
+
     choropleth_map = create_choropleth_map(
         df=merged_df,
         geojson_data=geojson_data,
@@ -203,6 +222,8 @@ try:
         zoom_start=zoom,
         colorscale="sequential",
         reverse_colors=False,
+        tooltip_fields=["ca_name", "per_capita"],
+        tooltip_aliases=["Combined Authority", "Per Capita (t CO2e)"],
     )
 
     # Display map
