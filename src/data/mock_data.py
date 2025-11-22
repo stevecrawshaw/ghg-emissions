@@ -441,6 +441,38 @@ def get_mock_epc_domestic_data(
         0.05,
     ]
 
+    # Mapping from age band to construction epoch (cleaned/categorized)
+    age_band_to_epoch = {
+        "before 1900": "Pre-1900",
+        "1900-1929": "1900-1929",
+        "1930-1949": "1930-1949",
+        "1950-1966": "1950-1966",
+        "1967-1975": "1967-1982",
+        "1976-1982": "1967-1982",
+        "1983-1990": "1983-1995",
+        "1991-1995": "1983-1995",
+        "1996-2002": "1996-2006",
+        "2003-2006": "1996-2006",
+        "2007-2011": "2007-present",
+        "2012 onwards": "2007-present",
+    }
+
+    # Mapping from age band to nominal construction year (mid-point)
+    age_band_to_year = {
+        "before 1900": 1890,
+        "1900-1929": 1915,
+        "1930-1949": 1940,
+        "1950-1966": 1958,
+        "1967-1975": 1971,
+        "1976-1982": 1979,
+        "1983-1990": 1987,
+        "1991-1995": 1993,
+        "1996-2002": 1999,
+        "2003-2006": 2005,
+        "2007-2011": 2009,
+        "2012 onwards": 2018,
+    }
+
     all_main_fuels = [
         "mains gas",
         "electricity",
@@ -554,6 +586,8 @@ def get_mock_epc_domestic_data(
                 "built_form": built_form,
                 "tenure": tenure,
                 "construction_age_band": age_band,
+                "construction_epoch": age_band_to_epoch[age_band],
+                "nominal_construction_year": age_band_to_year[age_band],
                 "main_fuel": main_fuel,
                 "total_floor_area": round(floor_area, 1),
                 "co2_emissions_current": round(co2_current, 2),
@@ -603,28 +637,35 @@ def load_epc_domestic_with_fallback(
 
         conn = get_connection()
 
+        # Load spatial extension (required for epc_domestic_ods_vw which uses st_astext)
+        conn.execute("INSTALL spatial; LOAD spatial;")
+
         # Build query with filters
+        # Use epc_domestic_vw which has actual SAP efficiency scores
+        # Filter to WECA local authorities
         query = """
         SELECT
-            lmk_key,
-            local_authority AS la_code,
-            ladnm AS la_name,
-            current_energy_rating,
-            potential_energy_rating,
+            LMK_KEY AS lmk_key,
+            LOCAL_AUTHORITY AS la_code,
+            LOCAL_AUTHORITY_LABEL AS la_name,
+            CURRENT_ENERGY_RATING AS current_energy_rating,
+            POTENTIAL_ENERGY_RATING AS potential_energy_rating,
             CURRENT_ENERGY_EFFICIENCY AS current_energy_efficiency,
             POTENTIAL_ENERGY_EFFICIENCY AS potential_energy_efficiency,
-            property_type,
+            PROPERTY_TYPE AS property_type,
             BUILT_FORM AS built_form,
-            tenure,
-            construction_age_band,
-            main_fuel,
-            total_floor_area,
-            co2_emissions_current,
-            co2_emissions_potential,
-            year AS lodgement_year,
+            TENURE_CLEAN AS tenure,
+            CONSTRUCTION_AGE_BAND AS construction_age_band,
+            CONSTRUCTION_EPOCH AS construction_epoch,
+            NOMINAL_CONSTRUCTION_YEAR AS nominal_construction_year,
+            MAIN_FUEL AS main_fuel,
+            TOTAL_FLOOR_AREA AS total_floor_area,
+            CO2_EMISSIONS_CURRENT AS co2_emissions_current,
+            CO2_EMISSIONS_POTENTIAL AS co2_emissions_potential,
+            LODGEMENT_YEAR AS lodgement_year,
             MAINS_GAS_FLAG AS mains_gas_flag
-        FROM mca_data.epc_domestic_ods_vw
-        WHERE 1=1
+        FROM mca_data.epc_domestic_vw
+        WHERE LOCAL_AUTHORITY IN ('E06000022', 'E06000023', 'E06000025', 'E06000024')
         """
 
         params = []
@@ -639,22 +680,22 @@ def load_epc_domestic_with_fallback(
             }
             la_codes = [la_mapping.get(la, la) for la in local_authorities]
             placeholders = ", ".join(["?" for _ in la_codes])
-            query += f" AND local_authority IN ({placeholders})"
+            query += f" AND LOCAL_AUTHORITY IN ({placeholders})"
             params.extend(la_codes)
 
         if energy_ratings:
             placeholders = ", ".join(["?" for _ in energy_ratings])
-            query += f" AND current_energy_rating IN ({placeholders})"
+            query += f" AND CURRENT_ENERGY_RATING IN ({placeholders})"
             params.extend(energy_ratings)
 
         if property_types:
             placeholders = ", ".join(["?" for _ in property_types])
-            query += f" AND property_type IN ({placeholders})"
+            query += f" AND PROPERTY_TYPE IN ({placeholders})"
             params.extend(property_types)
 
         if tenures:
             placeholders = ", ".join(["?" for _ in tenures])
-            query += f" AND tenure IN ({placeholders})"
+            query += f" AND TENURE_CLEAN IN ({placeholders})"
             params.extend(tenures)
 
         df = conn.execute(query, params).pl()

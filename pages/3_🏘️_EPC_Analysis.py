@@ -12,6 +12,7 @@ Features:
 - Data export functionality
 """
 
+import plotly.express as px
 import polars as pl
 import streamlit as st
 from dotenv import load_dotenv
@@ -214,7 +215,7 @@ with st.spinner("Loading EPC data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_ratings, use_container_width=True)
+        st.plotly_chart(fig_ratings, width="stretch")
 
     with col2:
         st.markdown("### Rating Distribution by LA")
@@ -238,7 +239,7 @@ with st.spinner("Loading EPC data..."):
                 template="weca",
             )
 
-            st.plotly_chart(fig_la_ratings, use_container_width=True)
+            st.plotly_chart(fig_la_ratings, width="stretch")
 
     st.markdown("---")
 
@@ -261,10 +262,9 @@ with st.spinner("Loading EPC data..."):
             values="count",
             names="property_type",
             title="Properties by Type",
-            template="weca",
         )
 
-        st.plotly_chart(fig_property, use_container_width=True)
+        st.plotly_chart(fig_property, width="stretch")
 
     with col2:
         st.markdown("### Tenure Distribution")
@@ -280,10 +280,9 @@ with st.spinner("Loading EPC data..."):
             values="count",
             names="tenure",
             title="Properties by Tenure",
-            template="weca",
         )
 
-        st.plotly_chart(fig_tenure, use_container_width=True)
+        st.plotly_chart(fig_tenure, width="stretch")
 
     st.markdown("---")
 
@@ -295,35 +294,23 @@ with st.spinner("Loading EPC data..."):
     with col1:
         st.markdown("### Properties by Construction Period")
 
-        age_counts = df.group_by("construction_age_band").agg(pl.len().alias("count"))
-
-        # Sort by approximate year
-        age_order = [
-            "before 1900",
-            "1900-1929",
-            "1930-1949",
-            "1950-1966",
-            "1967-1975",
-            "1976-1982",
-            "1983-1990",
-            "1991-1995",
-            "1996-2002",
-            "2003-2006",
-            "2007-2011",
-            "2012 onwards",
-        ]
-
-        # Create order mapping
-        order_map = {age: i for i, age in enumerate(age_order)}
-        age_counts = age_counts.with_columns(
-            pl.col("construction_age_band")
-            .map_elements(lambda x: order_map.get(x, 99), return_dtype=pl.Int64)
-            .alias("sort_order")
-        ).sort("sort_order")
+        # Use construction_epoch (cleaned/categorized) with nominal year for sorting
+        # Aggregate only by epoch to avoid subdivisions in bar chart
+        # Fill null years with 1850 to ensure "Before 1900" sorts first
+        age_counts = (
+            df.group_by("construction_epoch")
+            .agg(
+                pl.len().alias("count"),
+                pl.col("nominal_construction_year").first().alias("sort_year"),
+            )
+            .with_columns(pl.col("sort_year").fill_null(1850))
+            .sort("sort_year")
+            .drop("sort_year")
+        )
 
         fig_age = create_bar_comparison(
             age_counts,
-            x="construction_age_band",
+            x="construction_epoch",
             y="count",
             title="Properties by Construction Period",
             x_label="Construction Period",
@@ -335,47 +322,56 @@ with st.spinner("Loading EPC data..."):
         # Rotate x-axis labels
         fig_age.update_layout(xaxis_tickangle=-45)
 
-        st.plotly_chart(fig_age, use_container_width=True)
+        st.plotly_chart(fig_age, width="stretch")
 
     with col2:
         st.markdown("### Energy Rating by Construction Period")
 
-        # Create heatmap of rating vs age
-        age_rating = df.group_by(
-            ["construction_age_band", "current_energy_rating"]
-        ).agg(pl.len().alias("count"))
+        # Create heatmap of rating vs construction epoch (use long format data)
+        # Aggregate by epoch and rating, use a representative year for sorting
+        # Fill null years with 1850 to ensure "Before 1900" sorts first
+        age_rating = (
+            df.group_by(["construction_epoch", "current_energy_rating"])
+            .agg(
+                pl.len().alias("count"),
+                pl.col("nominal_construction_year").first().alias("sort_year"),
+            )
+            .with_columns(pl.col("sort_year").fill_null(1850))
+            .sort(["sort_year", "current_energy_rating"])
+        )
 
-        # Pivot for heatmap
-        age_rating_pivot = age_rating.pivot(
-            on="current_energy_rating",
-            index="construction_age_band",
-            values="count",
-        ).fill_null(0)
-
-        # Sort by construction period
-        if "construction_age_band" in age_rating_pivot.columns:
-            age_rating_pivot = (
-                age_rating_pivot.with_columns(
-                    pl.col("construction_age_band")
-                    .map_elements(lambda x: order_map.get(x, 99), return_dtype=pl.Int64)
-                    .alias("sort_order")
-                )
-                .sort("sort_order")
-                .drop("sort_order")
+        if not age_rating.is_empty():
+            # Pivot for heatmap - keep sort_year for ordering y-axis
+            rating_order = ["A", "B", "C", "D", "E", "F", "G"]
+            epoch_order = (
+                age_rating.select(["construction_epoch", "sort_year"])
+                .unique()
+                .sort("sort_year")["construction_epoch"]
+                .to_list()
             )
 
-        if not age_rating_pivot.is_empty():
-            fig_heatmap = create_heatmap(
-                age_rating_pivot,
-                x_cols=[c for c in all_ratings if c in age_rating_pivot.columns],
-                y_col="construction_age_band",
+            pivot_df = age_rating.pivot(
+                values="count", index="construction_epoch", on="current_energy_rating"
+            ).to_pandas()
+
+            # Reorder rows and columns
+            pivot_df = pivot_df.set_index("construction_epoch")
+            pivot_df = pivot_df.reindex(index=epoch_order)
+            rating_cols = [c for c in rating_order if c in pivot_df.columns]
+            pivot_df = pivot_df[rating_cols].fillna(0)
+
+            fig_heatmap = px.imshow(
+                pivot_df,
+                labels={"x": "Energy Rating", "y": "Construction Period", "color": "Count"},
+                aspect="auto",
+                color_continuous_scale="RdYlGn_r",
+            )
+            fig_heatmap.update_layout(
                 title="Energy Rating Distribution by Construction Period",
-                x_label="Energy Rating",
-                y_label="Construction Period",
-                template="weca",
+                height=400,
             )
 
-            st.plotly_chart(fig_heatmap, use_container_width=True)
+            st.plotly_chart(fig_heatmap, width="stretch")
 
     st.markdown("---")
 
@@ -404,7 +400,7 @@ with st.spinner("Loading EPC data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_fuel, use_container_width=True)
+        st.plotly_chart(fig_fuel, width="stretch")
 
     with col2:
         st.markdown("### Mains Gas Connection")
@@ -424,10 +420,9 @@ with st.spinner("Loading EPC data..."):
             values="count",
             names="gas_status",
             title="Mains Gas Connection",
-            template="weca",
         )
 
-        st.plotly_chart(fig_gas, use_container_width=True)
+        st.plotly_chart(fig_gas, width="stretch")
 
     st.markdown("---")
 
@@ -439,7 +434,7 @@ with st.spinner("Loading EPC data..."):
     with col1:
         st.markdown("### Current vs Potential Rating")
 
-        # Calculate improvement potential
+        # Calculate improvement potential (use long format data)
         improvement = (
             df.group_by(["current_energy_rating", "potential_energy_rating"])
             .agg(pl.len().alias("count"))
@@ -447,24 +442,17 @@ with st.spinner("Loading EPC data..."):
         )
 
         if not improvement.is_empty():
-            # Pivot for heatmap
-            improvement_pivot = improvement.pivot(
-                on="potential_energy_rating",
-                index="current_energy_rating",
-                values="count",
-            ).fill_null(0)
-
             fig_improvement = create_heatmap(
-                improvement_pivot,
-                x_cols=[c for c in all_ratings if c in improvement_pivot.columns],
-                y_col="current_energy_rating",
+                improvement,
+                x="potential_energy_rating",
+                y="current_energy_rating",
+                z="count",
                 title="Current Rating (rows) vs Potential Rating (columns)",
                 x_label="Potential Rating",
                 y_label="Current Rating",
-                template="weca",
             )
 
-            st.plotly_chart(fig_improvement, use_container_width=True)
+            st.plotly_chart(fig_improvement, width="stretch")
 
     with col2:
         st.markdown("### CO2 Savings Potential")
@@ -495,7 +483,7 @@ with st.spinner("Loading EPC data..."):
             template="weca",
         )
 
-        st.plotly_chart(fig_savings, use_container_width=True)
+        st.plotly_chart(fig_savings, width="stretch")
 
     st.markdown("---")
 
