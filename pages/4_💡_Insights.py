@@ -469,8 +469,8 @@ colors = [
 ]
 fig_comparison.update_traces(marker_color=colors)
 
-# Add England average line
-if not england_year.is_empty():
+# Add England average line (only for per capita - total emissions not comparable)
+if not england_year.is_empty() and selected_metric == "per_capita":
     fig_comparison.add_hline(
         y=england_avg,
         line_dash="dash",
