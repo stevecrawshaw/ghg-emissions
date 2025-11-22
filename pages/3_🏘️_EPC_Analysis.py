@@ -362,7 +362,11 @@ with st.spinner("Loading EPC data..."):
 
             fig_heatmap = px.imshow(
                 pivot_df,
-                labels={"x": "Energy Rating", "y": "Construction Period", "color": "Count"},
+                labels={
+                    "x": "Energy Rating",
+                    "y": "Construction Period",
+                    "color": "Count",
+                },
                 aspect="auto",
                 color_continuous_scale="RdYlGn_r",
             )
@@ -550,4 +554,5 @@ with st.spinner("Loading EPC data..."):
         base_filename="weca_epc_domestic",
         formats=["csv", "parquet", "json", "excel"],
         key_prefix="epc_export",
+        show_heading=False,
     )

@@ -317,4 +317,5 @@ with st.spinner("Loading emissions data..."):
         base_filename=f"weca_emissions_{start_year}_{end_year}",
         formats=["csv", "parquet", "json", "excel"],
         key_prefix="emissions_export",
+        show_heading=False,
     )

@@ -265,12 +265,13 @@ try:
 
     # Export options
     st.markdown("---")
-    st.markdown("### 💾 Export Data")
+    st.markdown("## 📥 Export Data")
 
     create_export_menu(
         df=display_df,
         base_filename=f"geographic_emissions_{year}",
         key_prefix="geo_export",
+        show_heading=False,
     )
 
 except MotherDuckConnectionError:

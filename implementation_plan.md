@@ -3,7 +3,7 @@
 **Project**: West of England Combined Authority GHG Emissions Dashboard
 **Stage**: Exploratory/Prototyping → Production
 **Last Updated**: 2025-11-22
-**Status**: 🟢 Phase 4.3 Complete → Phase 4.5 Ready to Start
+**Status**: 🟢 Phase 4.5 Complete → Phase 5 Ready to Start
 
 ---
 
@@ -13,12 +13,12 @@
 Phase 1: Foundation & Setup          [████████████████████████] 100% ✅
 Phase 2: Data Layer                  [████████████████████████] 100% ✅
 Phase 3: Visualization Components    [████████████████████████] 100% ✅
-Phase 4: Dashboard Pages             [██████████████──────────] 60% 🚧
+Phase 4: Dashboard Pages             [████████████████████████] 100% ✅
 Phase 5: Testing & Quality           [────────────────────────]  0% ⏳
 Phase 6: Deployment Preparation      [────────────────────────]  0% ⏳
 ```
 
-**Overall Progress**: 65% (Phases 1-3 complete, Phase 4 60% complete)
+**Overall Progress**: 75% (Phases 1-4 complete)
 
 ---
 
@@ -217,7 +217,7 @@ Phase 6: Deployment Preparation      [──────────────
 
 ---
 
-## Phase 4: Dashboard Pages 🚧 20% (1 of 5 sub-phases complete)
+## Phase 4: Dashboard Pages ✅ 100% COMPLETE
 
 **Goal**: Create multi-page Streamlit application
 
@@ -309,13 +309,24 @@ Phase 6: Deployment Preparation      [──────────────
 - Modern Polars JSON export via to_dicts() method
 - Consistent 1 decimal place formatting throughout
 
-#### 4.5: Insights & Comparisons Page ⏳ PENDING
-- [ ] Create `pages/4_💡_Insights.py`
-  - [ ] WECA vs other Combined Authorities
-  - [ ] WECA vs regional/national benchmarks
-  - [ ] Time series comparisons
-  - [ ] Per capita comparisons
-  - [ ] Rank/position indicators
+#### 4.5: Insights & Comparisons Page ✅ COMPLETE
+- [x] Create `pages/4_💡_Insights.py` (640 lines)
+  - [x] WECA vs other Combined Authorities comparison
+  - [x] WECA vs England average benchmarks
+  - [x] Time series comparisons (WECA vs England, top CAs)
+  - [x] Per capita and total emissions comparisons
+  - [x] Rank/position indicators with conditional highlighting
+  - [x] Key metrics cards (WECA value, rank, vs England, YoY change)
+  - [x] Interactive bar chart with WECA highlighting
+  - [x] Full rankings table with export functionality
+  - [x] Mock data fallback for offline development
+
+**Key Features**:
+- Compares WECA against 10 major Combined Authorities
+- Shows England average as benchmark line on charts
+- Calculates and displays WECA's rank position
+- Color-coded performance indicators (green for WECA, grey for others)
+- Year selector (2014-2023) with per capita/total metric toggle
 
 ### Dependencies
 - Phase 3 complete (visualization components)
@@ -497,6 +508,14 @@ uv add pytest-cov --group dev
 | WCAG compliance issues | Medium | Low | Regular Lighthouse audits, contrast checker |
 | Streamlit Cloud resource limits | Medium | Low | Monitor usage, optimize queries |
 | Data lag issues (18-month emissions delay) | Low | High | Document clearly in UI, add data freshness indicator |
+
+---
+
+## Known Issues
+
+| Issue | Page | Status | Notes |
+|-------|------|--------|-------|
+| EPC construction dates incorrect in source data | EPC Analysis | 🔴 Open | Need to resolve construction date mapping in MotherDuck source data |
 
 ---
 
