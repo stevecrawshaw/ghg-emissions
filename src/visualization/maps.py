@@ -179,18 +179,22 @@ def create_choropleth_map(
     df_pandas = df.select([location_col, value_col]).to_pandas()
 
     # Create choropleth
-    folium.Choropleth(
-        geo_data=geojson_data,
-        data=df_pandas,
-        columns=[location_col, value_col],
-        key_on=f"feature.properties.{location_col}",
-        fill_color=fill_color_code,
-        fill_opacity=0.7,
-        line_opacity=0.2,
-        legend_name=legend_name,
-        bins=bins,
-        nan_fill_color=nan_fill_color,
-    ).add_to(m)
+    # Build kwargs, only include bins if specified
+    choropleth_kwargs = {
+        "geo_data": geojson_data,
+        "data": df_pandas,
+        "columns": [location_col, value_col],
+        "key_on": f"feature.properties.{location_col}",
+        "fill_color": fill_color_code,
+        "fill_opacity": 0.7,
+        "line_opacity": 0.2,
+        "legend_name": legend_name,
+        "nan_fill_color": nan_fill_color,
+    }
+    if bins is not None:
+        choropleth_kwargs["bins"] = bins
+
+    folium.Choropleth(**choropleth_kwargs).add_to(m)
 
     # Add layer control
     folium.LayerControl().add_to(m)
