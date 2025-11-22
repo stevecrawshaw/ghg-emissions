@@ -132,7 +132,8 @@ def get_mock_ca_comparison_data() -> pl.DataFrame:
     for ca_name, ca_data in cas.items():
         for year in years:
             # Simulate declining emissions over time (2-4% per year from 2014)
-            year_factor = 1.0 - (0.03 * (2023 - year))
+            # 2023 is base year, earlier years had higher emissions
+            year_factor = 1.0 + (0.03 * (2023 - year))
             # Add some realistic variation (not cryptographic)
             variation = random.uniform(0.97, 1.03)  # noqa: S311
             total = ca_data["total_2023"] * year_factor * variation
@@ -176,7 +177,8 @@ def get_mock_england_average() -> pl.DataFrame:
 
     rows = []
     for year in range(2014, 2024):
-        year_factor = 1.0 - (0.028 * (2023 - year))  # ~2.8% decline per year
+        # 2023 is base year, earlier years had higher emissions (~2.8% decline per year)
+        year_factor = 1.0 + (0.028 * (2023 - year))
         variation = random.uniform(0.98, 1.02)  # noqa: S311
         total = england_2023_total * year_factor * variation
 
