@@ -265,7 +265,7 @@ try:
 
     # Export options
     st.markdown("---")
-    st.markdown("### 💾 Export Data")
+    st.markdown("## 📥 Export Data")
 
     create_export_menu(
         df=display_df,

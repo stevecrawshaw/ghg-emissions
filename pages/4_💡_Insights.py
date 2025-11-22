@@ -621,7 +621,7 @@ st.markdown("## 📋 Data Summary")
 with st.expander("View Dataset Details", expanded=False):
     create_data_summary_card(ca_df, title="CA Comparison Data Summary")
 
-st.markdown("### 📥 Export Data")
+st.markdown("## 📥 Export Data")
 
 create_export_menu(
     year_df,
