@@ -492,9 +492,15 @@ def create_heatmap(
     # Pivot data for heatmap
     pivot_df = df.pivot(values=z, index=y, columns=x)
 
+    # Convert to pandas and set the index column properly
+    # Polars pivot keeps the index as a regular column, need to set it as pandas index
+    pandas_df = pivot_df.to_pandas()
+    if y in pandas_df.columns:
+        pandas_df = pandas_df.set_index(y)
+
     # Create figure using imshow for better performance
     fig = px.imshow(
-        pivot_df.to_pandas(),
+        pandas_df,
         labels={"x": x_label or x, "y": y_label or y, "color": z},
         aspect="auto",
         color_continuous_scale=colorscale,
