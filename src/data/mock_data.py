@@ -403,6 +403,49 @@ def get_emissions_year_range() -> tuple[int, int, bool]:
         return 2005, 2023, True  # Mock fallback range
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_emissions_sectors() -> tuple[list[str], bool]:
+    """Get the available sectors from emissions data.
+
+    Queries the database to find all distinct sectors available.
+    Falls back to default sectors if database unavailable.
+
+    Returns:
+        Tuple of (list of sector names, is_mock_data)
+    """
+    from src.data.connections import MotherDuckConnectionError, get_connection
+
+    # Default sectors matching the schema
+    default_sectors = [
+        "Industry",
+        "Commercial",
+        "Public Sector",
+        "Domestic",
+        "Transport",
+        "Agriculture",
+        "LULUCF",
+        "Waste",
+    ]
+
+    try:
+        conn = get_connection()
+        result = conn.sql("""
+            SELECT DISTINCT la_ghg_sector
+            FROM ghg_emissions_tbl
+            WHERE la_ghg_sector IS NOT NULL
+            ORDER BY la_ghg_sector
+        """).fetchall()
+        conn.close()
+
+        if result:
+            sectors = [row[0] for row in result]
+            return sectors, False
+        return default_sectors, True  # Fallback if no data
+
+    except MotherDuckConnectionError:
+        return default_sectors, True  # Mock fallback
+
+
 # =============================================================================
 # EPC Mock Data Generators
 # =============================================================================

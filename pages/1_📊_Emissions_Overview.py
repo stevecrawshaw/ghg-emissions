@@ -23,6 +23,7 @@ from src.components.filters import (
     year_range_filter,
 )
 from src.data.mock_data import (
+    get_emissions_sectors,
     get_emissions_year_range,
     load_emissions_data_with_fallback,
     load_local_authorities_with_fallback,
@@ -106,17 +107,8 @@ selected_las = la_selector(
     help_text="Select one or more local authorities to analyze",
 )
 
-# Available sectors (from CLAUDE.md schema - includes all 8 sectors)
-sectors = [
-    "Industry",
-    "Commercial",
-    "Public Sector",
-    "Domestic",
-    "Transport",
-    "Agriculture",
-    "LULUCF",
-    "Waste",
-]
+# Available sectors (dynamically loaded from database)
+sectors, _ = get_emissions_sectors()
 
 # Sector filter
 selected_sectors = sector_filter(
