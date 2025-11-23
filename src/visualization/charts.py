@@ -156,11 +156,11 @@ def create_time_series(
         msg = f"Color column '{color}' not found in DataFrame"
         raise ChartError(msg, chart_type="time_series")
 
-    # Create figure
+    # Create figure - Plotly 6.0+ natively supports Polars DataFrames
     if len(y_cols) == 1 and color:
         # Single y column with color grouping
         fig = px.line(
-            df.to_pandas(),
+            df,
             x=x,
             y=y_cols[0],
             color=color,
@@ -170,7 +170,7 @@ def create_time_series(
     elif len(y_cols) == 1:
         # Single line, no grouping
         fig = px.line(
-            df.to_pandas(),
+            df,
             x=x,
             y=y_cols[0],
             markers=markers,
@@ -185,7 +185,7 @@ def create_time_series(
             value_name="value",
         )
         fig = px.line(
-            df_melted.to_pandas(),
+            df_melted,
             x=x,
             y="value",
             color="series",
@@ -275,9 +275,9 @@ def create_stacked_area(
         msg = f"Columns not found in DataFrame: {missing_cols}"
         raise ChartError(msg, chart_type="stacked_area")
 
-    # Create figure
+    # Create figure - Plotly 6.0+ natively supports Polars DataFrames
     fig = px.area(
-        df.to_pandas(),
+        df,
         x=x,
         y=y,
         color=group,
@@ -395,9 +395,9 @@ def create_bar_comparison(
             raise ChartError(msg, chart_type="bar_comparison")
         df = df.sort(sort_by, descending=not ascending)
 
-    # Create figure
+    # Create figure - Plotly 6.0+ natively supports Polars DataFrames
     fig = px.bar(
-        df.to_pandas(),
+        df,
         x=x if orientation == "v" else y,
         y=y if orientation == "v" else x,
         color=color,
@@ -492,9 +492,19 @@ def create_heatmap(
     # Pivot data for heatmap
     pivot_df = df.pivot(values=z, index=y, columns=x)
 
-    # Create figure using imshow for better performance
+    # Extract data directly from Polars without pandas conversion
+    # Get y labels (the index column values)
+    y_labels = pivot_df[y].to_list()
+    # Get x labels (all columns except the index)
+    x_labels = [c for c in pivot_df.columns if c != y]
+    # Get values as numpy array (excluding the index column)
+    values = pivot_df.select(pl.exclude(y)).to_numpy()
+
+    # Create figure using imshow with numpy array
     fig = px.imshow(
-        pivot_df.to_pandas(),
+        values,
+        x=x_labels,
+        y=y_labels,
         labels={"x": x_label or x, "y": y_label or y, "color": z},
         aspect="auto",
         color_continuous_scale=colorscale,
@@ -586,9 +596,9 @@ def create_scatter(
         msg = f"Columns not found in DataFrame: {missing_cols}"
         raise ChartError(msg, chart_type="scatter")
 
-    # Create figure
+    # Create figure - Plotly 6.0+ natively supports Polars DataFrames
     fig = px.scatter(
-        df.to_pandas(),
+        df,
         x=x,
         y=y,
         color=color,
@@ -683,9 +693,9 @@ def create_grouped_bar(
         msg = f"Columns not found in DataFrame: {missing_cols}"
         raise ChartError(msg, chart_type="grouped_bar")
 
-    # Create figure
+    # Create figure - Plotly 6.0+ natively supports Polars DataFrames
     fig = px.bar(
-        df.to_pandas(),
+        df,
         x=x if orientation == "v" else y,
         y=y if orientation == "v" else x,
         color=group,
