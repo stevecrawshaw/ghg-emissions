@@ -399,7 +399,10 @@ with st.spinner("Loading EPC data..."):
         if len(fuel_counts) > 5:
             top_5 = fuel_counts.head(5)
             other_count = fuel_counts.slice(5)["count"].sum()
-            other_row = pl.DataFrame({"main_fuel": ["Other"], "count": [other_count]})
+            # Cast to UInt32 to match the schema from pl.len()
+            other_row = pl.DataFrame(
+                {"main_fuel": ["Other"], "count": [other_count]}
+            ).cast({"count": pl.UInt32})
             fuel_counts = pl.concat([top_5, other_row])
 
         fig_fuel = create_bar_comparison(
