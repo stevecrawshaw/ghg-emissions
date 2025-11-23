@@ -23,6 +23,7 @@ from src.components.filters import (
     year_range_filter,
 )
 from src.data.mock_data import (
+    get_emissions_year_range,
     load_emissions_data_with_fallback,
     load_local_authorities_with_fallback,
 )
@@ -65,16 +66,17 @@ st.sidebar.header("🔍 Filters")
 las_df, is_mock = load_local_authorities_with_fallback()
 available_las = las_df["la_name"].to_list()
 
-# Debug: Show available LA names (remove this after verification)
-if not is_mock:
-    first_five = ", ".join(sorted(available_las)[:5])
-    st.sidebar.info(f"📋 Available LAs ({len(available_las)}): {first_five}...")
+# Get available year range dynamically from data
+data_min_year, data_max_year, _ = get_emissions_year_range()
 
-# Year range filter
+# Calculate 10-year default window (or full range if less than 10 years available)
+default_start = max(data_min_year, data_max_year - 9)
+
+# Year range filter with dynamic bounds
 start_year, end_year = year_range_filter(
-    min_year=2014,
-    max_year=2023,
-    default_range=(2019, 2023),
+    min_year=data_min_year,
+    max_year=data_max_year,
+    default_range=(default_start, data_max_year),
     key="year_range_overview",
     help_text="Select the time period for emissions analysis",
 )

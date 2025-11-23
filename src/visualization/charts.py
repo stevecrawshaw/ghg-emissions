@@ -55,6 +55,42 @@ class ChartError(Exception):
         super().__init__(self.message)
 
 
+def _format_column_label(column_name: str) -> str:
+    """Convert a column name to a nicely formatted label.
+
+    Args:
+        column_name: Raw column name (e.g., 'la_name', 'total_emissions_sum')
+
+    Returns:
+        Formatted label (e.g., 'Local Authority', 'Total Emissions')
+    """
+    # Common replacements for WECA emissions data
+    label_map = {
+        "la_name": "Local Authority",
+        "local_authority": "Local Authority",
+        "ca_name": "Combined Authority",
+        "calendar_year": "Year",
+        "total_emissions": "Total Emissions (kt CO2e)",
+        "total_emissions_sum": "Total Emissions (kt CO2e)",
+        "per_capita": "Per Capita (t CO2e)",
+        "per_capita_sum": "Per Capita (t CO2e)",
+        "per_km2": "Per km² (t CO2e)",
+        "per_km2_sum": "Per km² (t CO2e)",
+        "sector": "Sector",
+        "current_energy_rating": "Energy Rating",
+        "property_type": "Property Type",
+        "main_fuel": "Main Fuel",
+        "count": "Count",
+        "avg_savings": "Avg CO2 Savings (t/year)",
+    }
+
+    if column_name in label_map:
+        return label_map[column_name]
+
+    # Default: replace underscores with spaces and title case
+    return column_name.replace("_", " ").title()
+
+
 def create_time_series(
     df: pl.DataFrame,
     x: str,
@@ -161,14 +197,28 @@ def create_time_series(
     # Update layout
     fig.update_layout(
         title=title,
-        xaxis_title=x_label or x,
-        yaxis_title=y_label or (y if isinstance(y, str) else "Value"),
+        xaxis_title=x_label or _format_column_label(x),
+        yaxis_title=y_label
+        or _format_column_label(y if isinstance(y, str) else "Value"),
         height=height,
         hovermode="x unified",
     )
 
-    # Make lines thicker
-    fig.update_traces(line={"width": 3})
+    # Make lines thicker and format hover values
+    y_col = y if isinstance(y, str) else y_cols[0]
+    x_formatted = _format_column_label(x)
+    y_formatted = y_label or _format_column_label(y_col)
+
+    # Update traces with formatted hover template
+    for trace in fig.data:
+        trace.update(
+            line={"width": 3},
+            hovertemplate=(
+                f"<b>{x_formatted}</b>: %{{x}}<br>"
+                f"<b>{y_formatted}</b>: %{{y:.1f}}<br>"
+                "<extra>%{fullData.name}</extra>"
+            ),
+        )
 
     return fig
 
@@ -234,14 +284,29 @@ def create_stacked_area(
         template=template,
     )
 
+    # Format labels
+    x_formatted = x_label or _format_column_label(x)
+    y_formatted = y_label or _format_column_label(y)
+    group_formatted = _format_column_label(group)
+
     # Update layout
     fig.update_layout(
         title=title,
-        xaxis_title=x_label or x,
-        yaxis_title=y_label or y,
+        xaxis_title=x_formatted,
+        yaxis_title=y_formatted,
         height=height,
         hovermode="x unified",
     )
+
+    # Update traces with formatted hover template
+    for trace in fig.data:
+        trace.update(
+            hovertemplate=(
+                f"<b>{x_formatted}</b>: %{{x}}<br>"
+                f"<b>{y_formatted}</b>: %{{y:.1f}}<br>"
+                f"<b>{group_formatted}</b>: %{{fullData.name}}<extra></extra>"
+            ),
+        )
 
     # Update traces for better stacking
     fig.update_traces(
@@ -340,13 +405,30 @@ def create_bar_comparison(
         template=template,
     )
 
+    # Format labels
+    x_formatted = x_label or _format_column_label(x)
+    y_formatted = y_label or _format_column_label(y)
+
     # Update layout
     fig.update_layout(
         title=title,
-        xaxis_title=x_label or (x if orientation == "v" else y),
-        yaxis_title=y_label or (y if orientation == "v" else x),
+        xaxis_title=x_formatted if orientation == "v" else y_formatted,
+        yaxis_title=y_formatted if orientation == "v" else x_formatted,
         height=height,
     )
+
+    # Update traces with formatted hover template
+    if orientation == "v":
+        hover = (
+            f"<b>{x_formatted}</b>: %{{x}}<br>"
+            f"<b>{y_formatted}</b>: %{{y:.1f}}<extra></extra>"
+        )
+    else:
+        hover = (
+            f"<b>{x_formatted}</b>: %{{y}}<br>"
+            f"<b>{y_formatted}</b>: %{{x:.1f}}<extra></extra>"
+        )
+    fig.update_traces(hovertemplate=hover)
 
     return fig
 

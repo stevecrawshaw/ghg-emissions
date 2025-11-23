@@ -387,11 +387,20 @@ with st.spinner("Loading EPC data..."):
     with col1:
         st.markdown("### Main Heating Fuel")
 
+        # Get fuel counts and limit to top 5 + Other
         fuel_counts = (
-            df.group_by("main_fuel")
+            df.filter(pl.col("main_fuel").is_not_null())
+            .group_by("main_fuel")
             .agg(pl.len().alias("count"))
             .sort("count", descending=True)
         )
+
+        # Combine anything after top 5 into "Other"
+        if len(fuel_counts) > 5:
+            top_5 = fuel_counts.head(5)
+            other_count = fuel_counts.slice(5)["count"].sum()
+            other_row = pl.DataFrame({"main_fuel": ["Other"], "count": [other_count]})
+            fuel_counts = pl.concat([top_5, other_row])
 
         fig_fuel = create_bar_comparison(
             fuel_counts,
@@ -461,44 +470,75 @@ with st.spinner("Loading EPC data..."):
     with col2:
         st.markdown("### CO2 Savings Potential")
 
-        # Calculate average CO2 savings by current rating
-        co2_savings = (
-            df.with_columns(
-                (
-                    pl.col("co2_emissions_current") - pl.col("co2_emissions_potential")
-                ).alias("co2_savings")
-            )
-            .group_by("current_energy_rating")
-            .agg(
-                pl.mean("co2_savings").alias("avg_savings"),
-                pl.sum("co2_savings").alias("total_savings"),
-            )
-            .sort("current_energy_rating")
+        # Check if CO2 columns exist and have data
+        has_co2_data = (
+            "co2_emissions_current" in df.columns
+            and "co2_emissions_potential" in df.columns
         )
 
-        fig_savings = create_bar_comparison(
-            co2_savings,
-            x="current_energy_rating",
-            y="avg_savings",
-            title="Average CO2 Savings Potential by Current Rating",
-            x_label="Current Energy Rating",
-            y_label="Avg CO2 Savings (t/year)",
-            orientation="v",
-            template="weca",
-        )
+        if has_co2_data:
+            # Filter out nulls and calculate CO2 savings
+            co2_df = df.filter(
+                pl.col("co2_emissions_current").is_not_null()
+                & pl.col("co2_emissions_potential").is_not_null()
+                & (pl.col("co2_emissions_current") > 0)
+            )
 
-        st.plotly_chart(fig_savings, width="stretch")
+            if not co2_df.is_empty():
+                co2_savings = (
+                    co2_df.with_columns(
+                        (
+                            pl.col("co2_emissions_current")
+                            - pl.col("co2_emissions_potential")
+                        ).alias("co2_savings")
+                    )
+                    .group_by("current_energy_rating")
+                    .agg(
+                        pl.mean("co2_savings").alias("avg_savings"),
+                        pl.sum("co2_savings").alias("total_savings"),
+                    )
+                    .sort("current_energy_rating")
+                )
+
+                fig_savings = create_bar_comparison(
+                    co2_savings,
+                    x="current_energy_rating",
+                    y="avg_savings",
+                    title="Average CO2 Savings Potential by Current Rating",
+                    x_label="Current Energy Rating",
+                    y_label="Avg CO2 Savings (t/year)",
+                    orientation="v",
+                    template="weca",
+                )
+
+                st.plotly_chart(fig_savings, width="stretch")
+            else:
+                st.info("No CO2 emissions data available for the selected filters.")
+        else:
+            st.info("CO2 emissions data not available in this dataset.")
 
     st.markdown("---")
 
     # Key insights
     st.markdown("## 💡 Key Insights")
 
-    # Calculate insights
-    total_co2_current = df["co2_emissions_current"].sum()
-    total_co2_potential = df["co2_emissions_potential"].sum()
-    total_savings = total_co2_current - total_co2_potential if total_co2_current else 0
-    pct_savings = (total_savings / total_co2_current * 100) if total_co2_current else 0
+    # Calculate CO2 insights (handle missing columns)
+    if has_co2_data:
+        co2_valid = df.filter(
+            pl.col("co2_emissions_current").is_not_null()
+            & pl.col("co2_emissions_potential").is_not_null()
+        )
+        total_co2_current = co2_valid["co2_emissions_current"].sum()
+        total_co2_potential = co2_valid["co2_emissions_potential"].sum()
+        total_savings = (
+            total_co2_current - total_co2_potential if total_co2_current else 0
+        )
+        pct_savings = (
+            (total_savings / total_co2_current * 100) if total_co2_current else 0
+        )
+    else:
+        total_savings = 0
+        pct_savings = 0
 
     # Properties with poor ratings (E, F, G)
     poor_ratings = df.filter(pl.col("current_energy_rating").is_in(["E", "F", "G"]))
@@ -509,12 +549,19 @@ with st.spinner("Loading EPC data..."):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.metric(
-            label="Total CO2 Savings Potential",
-            value=f"{total_savings:,.1f} t/year",
-            delta=f"-{pct_savings:.1f}% potential reduction",
-            delta_color="normal",
-        )
+        if has_co2_data and total_savings > 0:
+            st.metric(
+                label="Total CO2 Savings Potential",
+                value=f"{total_savings:,.1f} t/year",
+                delta=f"-{pct_savings:.1f}% potential reduction",
+                delta_color="normal",
+            )
+        else:
+            st.metric(
+                label="Total CO2 Savings Potential",
+                value="N/A",
+                help="CO2 data not available for this selection",
+            )
 
     with col2:
         st.metric(

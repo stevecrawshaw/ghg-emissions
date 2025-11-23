@@ -146,6 +146,17 @@ def export_to_json(
     """
     try:
         import json
+        from datetime import date, datetime
+        from decimal import Decimal
+
+        # Custom JSON encoder for special types
+        class CustomJSONEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, Decimal):
+                    return float(obj)
+                if isinstance(obj, datetime | date):
+                    return obj.isoformat()
+                return super().default(obj)
 
         # Convert DataFrame to dict, then to JSON string
         if orient == "records":
@@ -161,9 +172,11 @@ def export_to_json(
 
         # Convert to JSON string with optional pretty printing
         if pretty:
-            json_str = json.dumps(data, indent=2, ensure_ascii=False)
+            json_str = json.dumps(
+                data, indent=2, ensure_ascii=False, cls=CustomJSONEncoder
+            )
         else:
-            json_str = json.dumps(data, ensure_ascii=False)
+            json_str = json.dumps(data, ensure_ascii=False, cls=CustomJSONEncoder)
 
         return json_str.encode("utf-8")
     except ExportError:
