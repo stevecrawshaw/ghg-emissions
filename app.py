@@ -204,6 +204,8 @@ def main() -> None:
 
     # Sidebar info
     with st.sidebar:
+        st.markdown("## 📊 Dashboard")
+        st.markdown("---")
         st.markdown("### 📚 Quick Links")
         st.markdown(
             """

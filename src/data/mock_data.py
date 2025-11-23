@@ -767,10 +767,11 @@ def _load_epc_data_cached(
     params = []
 
     if local_authorities_tuple:
-        # Convert names to codes if needed
+        # Convert names to codes if needed (handle both naming conventions)
         la_mapping = {
             "Bath and North East Somerset": "E06000022",
             "Bristol": "E06000023",
+            "Bristol, City of": "E06000023",  # Alternative name in some datasets
             "South Gloucestershire": "E06000025",
             "North Somerset": "E06000024",
         }
