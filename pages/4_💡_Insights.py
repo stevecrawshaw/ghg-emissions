@@ -60,8 +60,14 @@ st.markdown(
 # =============================================================================
 
 
-def get_mock_ca_comparison_data() -> pl.DataFrame:
+def get_mock_ca_comparison_data(
+    min_year: int = 2005, max_year: int = 2023
+) -> pl.DataFrame:
     """Generate mock Combined Authority emissions comparison data.
+
+    Args:
+        min_year: Start year for data generation
+        max_year: End year for data generation
 
     Returns:
         DataFrame with CA-level emissions for comparison
@@ -127,13 +133,13 @@ def get_mock_ca_comparison_data() -> pl.DataFrame:
 
     # Generate time series data (2014-2023)
     rows = []
-    years = range(2014, 2024)
+    years = range(min_year, max_year + 1)
 
     for ca_name, ca_data in cas.items():
         for year in years:
-            # Simulate declining emissions over time (2-4% per year from 2014)
-            # 2023 is base year, earlier years had higher emissions
-            year_factor = 1.0 + (0.03 * (2023 - year))
+            # Simulate declining emissions over time (2-4% per year)
+            # max_year is base year, earlier years had higher emissions
+            year_factor = 1.0 + (0.03 * (max_year - year))
             # Add some realistic variation (not cryptographic)
             variation = random.uniform(0.97, 1.03)  # noqa: S311
             total = ca_data["total_2023"] * year_factor * variation
@@ -159,8 +165,14 @@ def get_mock_ca_comparison_data() -> pl.DataFrame:
     return pl.DataFrame(rows)
 
 
-def get_mock_england_average() -> pl.DataFrame:
+def get_mock_england_average(
+    min_year: int = 2005, max_year: int = 2023
+) -> pl.DataFrame:
     """Generate mock England average emissions data.
+
+    Args:
+        min_year: Start year for data generation
+        max_year: End year for data generation
 
     Returns:
         DataFrame with England-level emissions averages
@@ -176,9 +188,9 @@ def get_mock_england_average() -> pl.DataFrame:
     england_area = 130279  # km2
 
     rows = []
-    for year in range(2014, 2024):
+    for year in range(min_year, max_year + 1):
         # 2023 is base year, earlier years had higher emissions (~2.8% decline per year)
-        year_factor = 1.0 + (0.028 * (2023 - year))
+        year_factor = 1.0 + (0.028 * (max_year - year))
         variation = random.uniform(0.98, 1.02)  # noqa: S311
         total = england_2023_total * year_factor * variation
 
@@ -256,8 +268,14 @@ def load_ca_comparison_with_fallback() -> tuple[pl.DataFrame, bool]:
         return get_mock_ca_comparison_data(), True
 
 
-def load_england_average_with_fallback() -> tuple[pl.DataFrame, bool]:
+def load_england_average_with_fallback(
+    min_year: int = 2005, max_year: int = 2023
+) -> tuple[pl.DataFrame, bool]:
     """Load England average data with automatic fallback.
+
+    Args:
+        min_year: Minimum year for data
+        max_year: Maximum year for data
 
     Returns:
         Tuple of (DataFrame, is_mock_data_boolean)
@@ -286,13 +304,29 @@ def load_england_average_with_fallback() -> tuple[pl.DataFrame, bool]:
         conn.close()
 
         if df.is_empty():
-            return get_mock_england_average(), True
+            return get_mock_england_average(min_year, max_year), True
 
         return df, False
 
     except (MotherDuckConnectionError, Exception):
-        return get_mock_england_average(), True
+        return get_mock_england_average(min_year, max_year), True
 
+
+# =============================================================================
+# Load Data First (to get year range)
+# =============================================================================
+
+# Load CA comparison data
+ca_df, is_ca_mock = load_ca_comparison_with_fallback()
+
+# Get year range from loaded data
+data_min_year = int(ca_df["calendar_year"].min())
+data_max_year = int(ca_df["calendar_year"].max())
+
+# Load England average with matching year range
+england_df, is_england_mock = load_england_average_with_fallback(
+    min_year=data_min_year, max_year=data_max_year
+)
 
 # =============================================================================
 # Sidebar Filters
@@ -300,11 +334,11 @@ def load_england_average_with_fallback() -> tuple[pl.DataFrame, bool]:
 
 st.sidebar.header("🔍 Filters")
 
-# Year selector
+# Year selector with dynamic range from data
 selected_year = single_year_filter(
-    min_year=2014,
-    max_year=2023,
-    default_year=2023,
+    min_year=data_min_year,
+    max_year=data_max_year,
+    default_year=data_max_year,
     key="insights_year",
     help_text="Select year for comparison snapshot",
 )
@@ -335,17 +369,10 @@ st.sidebar.info(
     """
 )
 
-# =============================================================================
-# Load Data
-# =============================================================================
-
-with st.spinner("Loading comparison data..."):
-    ca_df, is_mock_ca = load_ca_comparison_with_fallback()
-    england_df, is_mock_england = load_england_average_with_fallback()
-
-    if ca_df.is_empty():
-        st.error("No comparison data available. Please check database connection.")
-        st.stop()
+# Check data availability
+if ca_df.is_empty():
+    st.error("No comparison data available. Please check database connection.")
+    st.stop()
 
 # =============================================================================
 # Key Metrics

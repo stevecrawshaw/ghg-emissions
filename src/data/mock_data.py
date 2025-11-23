@@ -276,6 +276,24 @@ def load_emissions_data_with_fallback(
         if "la_ghg_sector" in df.columns:
             df = df.rename({"la_ghg_sector": "sector"})
 
+        # Aggregate sub-sectors to sector level to avoid double counting
+        # ghg_emissions_tbl has rows for each sub-sector; we need to sum them by sector
+        if "la_ghg_sub_sector" in df.columns and not df.is_empty():
+            group_cols = [
+                "la_name",
+                "local_authority_code",
+                "calendar_year",
+                "sector",
+            ]
+            # Aggregate by sector (sum emissions, take first for other fields)
+            agg_exprs = [pl.sum("territorial_emissions_kt_co2e")]
+            if "mid_year_population_thousands" in df.columns:
+                agg_exprs.append(pl.first("mid_year_population_thousands"))
+            if "area_km2" in df.columns:
+                agg_exprs.append(pl.first("area_km2"))
+
+            df = df.group_by(group_cols).agg(agg_exprs)
+
         # Add calculated metric columns to match mock data format
         if "territorial_emissions_kt_co2e" in df.columns:
             # total_emissions is the same as territorial_emissions
@@ -350,6 +368,34 @@ def load_local_authorities_with_fallback() -> tuple[pl.DataFrame, bool]:
         # Fall back to mock data (warning already shown by emissions loader)
         df = get_mock_local_authorities()
         return df, True  # Mock data
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_emissions_year_range() -> tuple[int, int, bool]:
+    """Get the available year range from emissions data.
+
+    Queries the database to find the min and max calendar years available.
+    Falls back to default range if database unavailable.
+
+    Returns:
+        Tuple of (min_year, max_year, is_mock_data)
+    """
+    from src.data.connections import MotherDuckConnectionError, get_connection
+
+    try:
+        conn = get_connection()
+        result = conn.sql("""
+            SELECT MIN(calendar_year) as min_year, MAX(calendar_year) as max_year
+            FROM ghg_emissions_tbl
+        """).fetchone()
+        conn.close()
+
+        if result and result[0] is not None:
+            return int(result[0]), int(result[1]), False
+        return 2005, 2023, True  # Fallback if no data
+
+    except MotherDuckConnectionError:
+        return 2005, 2023, True  # Mock fallback range
 
 
 # =============================================================================
@@ -612,6 +658,99 @@ def get_epc_rating_distribution() -> dict[str, list[float]]:
     }
 
 
+@st.cache_data(ttl=3600, show_spinner="Loading EPC data...")
+def _load_epc_data_cached(
+    local_authorities_tuple: tuple[str, ...] | None = None,
+    energy_ratings_tuple: tuple[str, ...] | None = None,
+    property_types_tuple: tuple[str, ...] | None = None,
+    tenures_tuple: tuple[str, ...] | None = None,
+) -> pl.DataFrame:
+    """Cached inner function to load EPC data from MotherDuck.
+
+    Uses tuples instead of lists for hashability with st.cache_data.
+
+    Args:
+        local_authorities_tuple: Filter to specific LA names (as tuple)
+        energy_ratings_tuple: Filter to specific energy ratings (as tuple)
+        property_types_tuple: Filter to specific property types (as tuple)
+        tenures_tuple: Filter to specific tenure types (as tuple)
+
+    Returns:
+        DataFrame with EPC data
+
+    Raises:
+        Exception: If database connection or query fails
+    """
+    from src.data.connections import get_connection
+
+    conn = get_connection()
+
+    # Load spatial extension (required for epc_domestic_ods_vw which uses st_astext)
+    conn.execute("INSTALL spatial; LOAD spatial;")
+
+    # Build query with filters
+    # Use epc_domestic_vw which has actual SAP efficiency scores
+    # Filter to WECA local authorities
+    query = """
+    SELECT
+        LMK_KEY AS lmk_key,
+        LOCAL_AUTHORITY AS la_code,
+        LOCAL_AUTHORITY_LABEL AS la_name,
+        CURRENT_ENERGY_RATING AS current_energy_rating,
+        POTENTIAL_ENERGY_RATING AS potential_energy_rating,
+        CURRENT_ENERGY_EFFICIENCY AS current_energy_efficiency,
+        POTENTIAL_ENERGY_EFFICIENCY AS potential_energy_efficiency,
+        PROPERTY_TYPE AS property_type,
+        BUILT_FORM AS built_form,
+        TENURE_CLEAN AS tenure,
+        CONSTRUCTION_AGE_BAND AS construction_age_band,
+        CONSTRUCTION_EPOCH AS construction_epoch,
+        NOMINAL_CONSTRUCTION_YEAR AS nominal_construction_year,
+        MAIN_FUEL AS main_fuel,
+        TOTAL_FLOOR_AREA AS total_floor_area,
+        CO2_EMISSIONS_CURRENT AS co2_emissions_current,
+        CO2_EMISSIONS_POTENTIAL AS co2_emissions_potential,
+        LODGEMENT_YEAR AS lodgement_year,
+        MAINS_GAS_FLAG AS mains_gas_flag
+    FROM mca_data.epc_domestic_vw
+    WHERE LOCAL_AUTHORITY IN ('E06000022', 'E06000023', 'E06000025', 'E06000024')
+    """
+
+    params = []
+
+    if local_authorities_tuple:
+        # Convert names to codes if needed
+        la_mapping = {
+            "Bath and North East Somerset": "E06000022",
+            "Bristol": "E06000023",
+            "South Gloucestershire": "E06000025",
+            "North Somerset": "E06000024",
+        }
+        la_codes = [la_mapping.get(la, la) for la in local_authorities_tuple]
+        placeholders = ", ".join(["?" for _ in la_codes])
+        query += f" AND LOCAL_AUTHORITY IN ({placeholders})"
+        params.extend(la_codes)
+
+    if energy_ratings_tuple:
+        placeholders = ", ".join(["?" for _ in energy_ratings_tuple])
+        query += f" AND CURRENT_ENERGY_RATING IN ({placeholders})"
+        params.extend(energy_ratings_tuple)
+
+    if property_types_tuple:
+        placeholders = ", ".join(["?" for _ in property_types_tuple])
+        query += f" AND PROPERTY_TYPE IN ({placeholders})"
+        params.extend(property_types_tuple)
+
+    if tenures_tuple:
+        placeholders = ", ".join(["?" for _ in tenures_tuple])
+        query += f" AND TENURE_CLEAN IN ({placeholders})"
+        params.extend(tenures_tuple)
+
+    df = conn.execute(query, params).pl()
+    conn.close()
+    return df
+
+
 def load_epc_domestic_with_fallback(
     local_authorities: list[str] | None = None,
     energy_ratings: list[str] | None = None,
@@ -632,73 +771,19 @@ def load_epc_domestic_with_fallback(
     from src.data.connections import MotherDuckConnectionError
 
     try:
-        # Try to load real data from MotherDuck
-        from src.data.connections import get_connection
+        # Convert lists to tuples for caching (tuples are hashable)
+        la_tuple = tuple(local_authorities) if local_authorities else None
+        rating_tuple = tuple(energy_ratings) if energy_ratings else None
+        prop_tuple = tuple(property_types) if property_types else None
+        tenure_tuple = tuple(tenures) if tenures else None
 
-        conn = get_connection()
-
-        # Load spatial extension (required for epc_domestic_ods_vw which uses st_astext)
-        conn.execute("INSTALL spatial; LOAD spatial;")
-
-        # Build query with filters
-        # Use epc_domestic_vw which has actual SAP efficiency scores
-        # Filter to WECA local authorities
-        query = """
-        SELECT
-            LMK_KEY AS lmk_key,
-            LOCAL_AUTHORITY AS la_code,
-            LOCAL_AUTHORITY_LABEL AS la_name,
-            CURRENT_ENERGY_RATING AS current_energy_rating,
-            POTENTIAL_ENERGY_RATING AS potential_energy_rating,
-            CURRENT_ENERGY_EFFICIENCY AS current_energy_efficiency,
-            POTENTIAL_ENERGY_EFFICIENCY AS potential_energy_efficiency,
-            PROPERTY_TYPE AS property_type,
-            BUILT_FORM AS built_form,
-            TENURE_CLEAN AS tenure,
-            CONSTRUCTION_AGE_BAND AS construction_age_band,
-            CONSTRUCTION_EPOCH AS construction_epoch,
-            NOMINAL_CONSTRUCTION_YEAR AS nominal_construction_year,
-            MAIN_FUEL AS main_fuel,
-            TOTAL_FLOOR_AREA AS total_floor_area,
-            CO2_EMISSIONS_CURRENT AS co2_emissions_current,
-            CO2_EMISSIONS_POTENTIAL AS co2_emissions_potential,
-            LODGEMENT_YEAR AS lodgement_year,
-            MAINS_GAS_FLAG AS mains_gas_flag
-        FROM mca_data.epc_domestic_vw
-        WHERE LOCAL_AUTHORITY IN ('E06000022', 'E06000023', 'E06000025', 'E06000024')
-        """
-
-        params = []
-
-        if local_authorities:
-            # Convert names to codes if needed
-            la_mapping = {
-                "Bath and North East Somerset": "E06000022",
-                "Bristol": "E06000023",
-                "South Gloucestershire": "E06000025",
-                "North Somerset": "E06000024",
-            }
-            la_codes = [la_mapping.get(la, la) for la in local_authorities]
-            placeholders = ", ".join(["?" for _ in la_codes])
-            query += f" AND LOCAL_AUTHORITY IN ({placeholders})"
-            params.extend(la_codes)
-
-        if energy_ratings:
-            placeholders = ", ".join(["?" for _ in energy_ratings])
-            query += f" AND CURRENT_ENERGY_RATING IN ({placeholders})"
-            params.extend(energy_ratings)
-
-        if property_types:
-            placeholders = ", ".join(["?" for _ in property_types])
-            query += f" AND PROPERTY_TYPE IN ({placeholders})"
-            params.extend(property_types)
-
-        if tenures:
-            placeholders = ", ".join(["?" for _ in tenures])
-            query += f" AND TENURE_CLEAN IN ({placeholders})"
-            params.extend(tenures)
-
-        df = conn.execute(query, params).pl()
+        # Call cached inner function
+        df = _load_epc_data_cached(
+            local_authorities_tuple=la_tuple,
+            energy_ratings_tuple=rating_tuple,
+            property_types_tuple=prop_tuple,
+            tenures_tuple=tenure_tuple,
+        )
         return df, False  # Real data
 
     except (MotherDuckConnectionError, Exception) as e:
