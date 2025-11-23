@@ -18,8 +18,7 @@ textColor = "#1F1F1F"
 font = "sans serif"
 
 [server]
-# Security settings
-enableCORS = false
+# Security settings - XSRF protection enabled (CORS defaults to true)
 enableXsrfProtection = true
 
 # File upload limit (200 MB)

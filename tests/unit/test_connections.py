@@ -16,7 +16,9 @@ from src.data.connections import (
     get_connection,
     get_table_info,
     get_table_list,
-    test_connection,
+)
+from src.data.connections import (
+    test_connection as check_connection,
 )
 
 
@@ -91,7 +93,7 @@ class TestGetConnection:
         assert kwargs.get("read_only") is True
 
 
-class TestTestConnection:
+class TestCheckConnection:
     """Tests for the test_connection function."""
 
     @patch("src.data.connections.get_connection")
@@ -103,7 +105,7 @@ class TestTestConnection:
         mock_conn.sql.return_value = mock_result
         mock_get_connection.return_value = mock_conn
 
-        result = test_connection()
+        result = check_connection()
 
         assert result is True
         mock_conn.sql.assert_called_once_with("SELECT 1 AS test")
@@ -114,7 +116,7 @@ class TestTestConnection:
         """Test failed connection test."""
         mock_get_connection.side_effect = MotherDuckConnectionError("Connection failed")
 
-        result = test_connection()
+        result = check_connection()
 
         assert result is False
 
@@ -125,7 +127,7 @@ class TestTestConnection:
         mock_result.fetchone.return_value = (1,)
         mock_conn.sql.return_value = mock_result
 
-        result = test_connection(conn=mock_conn)
+        result = check_connection(conn=mock_conn)
 
         assert result is True
         # Should not close provided connection
@@ -138,7 +140,7 @@ class TestTestConnection:
         mock_result.fetchone.return_value = None
         mock_conn.sql.return_value = mock_result
 
-        result = test_connection(conn=mock_conn)
+        result = check_connection(conn=mock_conn)
 
         assert result is False
 
