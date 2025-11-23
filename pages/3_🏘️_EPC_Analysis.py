@@ -508,15 +508,8 @@ with st.spinner("Loading EPC data..."):
                     .sort("current_energy_rating")
                 )
 
-                # Only show chart if we have meaningful data
-                # (any non-null, non-zero values)
-                has_meaningful_data = (
-                    not co2_savings.is_empty()
-                    and co2_savings["avg_savings"].drop_nulls().len() > 0
-                    and (co2_savings["avg_savings"].abs().sum() or 0) > 0.001
-                )
-
-                if has_meaningful_data:
+                # Show chart if we have data after aggregation
+                if not co2_savings.is_empty() and len(co2_savings) > 0:
                     fig_savings = create_bar_comparison(
                         co2_savings,
                         x="current_energy_rating",
