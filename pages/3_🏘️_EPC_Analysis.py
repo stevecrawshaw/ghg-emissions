@@ -480,6 +480,12 @@ with st.spinner("Loading EPC data..."):
         )
 
         if has_co2_data:
+            # Cast DECIMAL columns to float for proper arithmetic
+            df = df.with_columns(
+                pl.col("co2_emissions_current").cast(pl.Float64),
+                pl.col("co2_emissions_potential").cast(pl.Float64),
+            )
+
             # Filter out nulls and ensure current > potential for savings
             co2_df = df.filter(
                 pl.col("co2_emissions_current").is_not_null()
