@@ -62,8 +62,9 @@ st.sidebar.header("🔍 Filters")
 las_df, is_mock = load_local_authorities_with_fallback()
 available_las = las_df["la_name"].to_list()
 
-# Local authority selector
+# Local authority selector - check both Bristol naming conventions
 default_las = []
+bristol_added = False
 for name in [
     "Bristol, City of",
     "Bristol",
@@ -71,7 +72,12 @@ for name in [
     "South Gloucestershire",
     "North Somerset",
 ]:
-    if name in available_las:
+    # Avoid adding both "Bristol" and "Bristol, City of"
+    if name in ["Bristol", "Bristol, City of"]:
+        if not bristol_added and name in available_las:
+            default_las.append(name)
+            bristol_added = True
+    elif name in available_las:
         default_las.append(name)
 
 if not default_las:

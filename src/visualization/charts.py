@@ -55,6 +55,27 @@ class ChartError(Exception):
         super().__init__(self.message)
 
 
+# Common label mappings for WECA emissions data
+LABEL_MAP = {
+    "la_name": "Local Authority",
+    "local_authority": "Local Authority",
+    "ca_name": "Combined Authority",
+    "calendar_year": "Year",
+    "total_emissions": "Total Emissions (kt CO2e)",
+    "total_emissions_sum": "Total Emissions (kt CO2e)",
+    "per_capita": "Per Capita (t CO2e)",
+    "per_capita_sum": "Per Capita (t CO2e)",
+    "per_km2": "Per km² (t CO2e)",
+    "per_km2_sum": "Per km² (t CO2e)",
+    "sector": "Sector",
+    "current_energy_rating": "Energy Rating",
+    "property_type": "Property Type",
+    "main_fuel": "Main Fuel",
+    "count": "Count",
+    "avg_savings": "Avg CO2 Savings (t/year)",
+}
+
+
 def _format_column_label(column_name: str) -> str:
     """Convert a column name to a nicely formatted label.
 
@@ -64,31 +85,23 @@ def _format_column_label(column_name: str) -> str:
     Returns:
         Formatted label (e.g., 'Local Authority', 'Total Emissions')
     """
-    # Common replacements for WECA emissions data
-    label_map = {
-        "la_name": "Local Authority",
-        "local_authority": "Local Authority",
-        "ca_name": "Combined Authority",
-        "calendar_year": "Year",
-        "total_emissions": "Total Emissions (kt CO2e)",
-        "total_emissions_sum": "Total Emissions (kt CO2e)",
-        "per_capita": "Per Capita (t CO2e)",
-        "per_capita_sum": "Per Capita (t CO2e)",
-        "per_km2": "Per km² (t CO2e)",
-        "per_km2_sum": "Per km² (t CO2e)",
-        "sector": "Sector",
-        "current_energy_rating": "Energy Rating",
-        "property_type": "Property Type",
-        "main_fuel": "Main Fuel",
-        "count": "Count",
-        "avg_savings": "Avg CO2 Savings (t/year)",
-    }
-
-    if column_name in label_map:
-        return label_map[column_name]
+    if column_name in LABEL_MAP:
+        return LABEL_MAP[column_name]
 
     # Default: replace underscores with spaces and title case
     return column_name.replace("_", " ").title()
+
+
+def _get_labels_dict(*columns: str) -> dict[str, str]:
+    """Create a labels dict for Plotly from column names.
+
+    Args:
+        *columns: Column names to include in the labels dict
+
+    Returns:
+        Dict mapping column names to formatted labels
+    """
+    return {col: _format_column_label(col) for col in columns if col}
 
 
 def create_time_series(
@@ -156,6 +169,9 @@ def create_time_series(
         msg = f"Color column '{color}' not found in DataFrame"
         raise ChartError(msg, chart_type="time_series")
 
+    # Create labels dict for nice legend/axis names
+    labels = _get_labels_dict(x, y_cols[0] if len(y_cols) == 1 else None, color)
+
     # Create figure - Plotly 6.0+ natively supports Polars DataFrames
     if len(y_cols) == 1 and color:
         # Single y column with color grouping
@@ -166,6 +182,7 @@ def create_time_series(
             color=color,
             markers=markers,
             template=template,
+            labels=labels,
         )
     elif len(y_cols) == 1:
         # Single line, no grouping
@@ -175,6 +192,7 @@ def create_time_series(
             y=y_cols[0],
             markers=markers,
             template=template,
+            labels=labels,
         )
     else:
         # Multiple y columns - melt DataFrame first
@@ -191,6 +209,7 @@ def create_time_series(
             color="series",
             markers=markers,
             template=template,
+            labels=_get_labels_dict(x, "value", "series"),
         )
         y_label = y_label or "Value"
 
@@ -282,6 +301,7 @@ def create_stacked_area(
         y=y,
         color=group,
         template=template,
+        labels=_get_labels_dict(x, y, group),
     )
 
     # Format labels
@@ -403,6 +423,7 @@ def create_bar_comparison(
         color=color,
         orientation=orientation,
         template=template,
+        labels=_get_labels_dict(x, y, color),
     )
 
     # Format labels
@@ -702,13 +723,14 @@ def create_grouped_bar(
         orientation=orientation,
         barmode=barmode,
         template=template,
+        labels=_get_labels_dict(x, y, group),
     )
 
     # Update layout
     fig.update_layout(
         title=title,
-        xaxis_title=x_label or (x if orientation == "v" else y),
-        yaxis_title=y_label or (y if orientation == "v" else x),
+        xaxis_title=x_label or _format_column_label(x if orientation == "v" else y),
+        yaxis_title=y_label or _format_column_label(y if orientation == "v" else x),
         height=height,
     )
 
