@@ -106,7 +106,7 @@ selected_las = la_selector(
     help_text="Select one or more local authorities to analyze",
 )
 
-# Available sectors (from CLAUDE.md schema)
+# Available sectors (from CLAUDE.md schema - includes all 8 sectors)
 sectors = [
     "Industry",
     "Commercial",
@@ -115,6 +115,7 @@ sectors = [
     "Transport",
     "Agriculture",
     "LULUCF",
+    "Waste",
 ]
 
 # Sector filter

@@ -68,7 +68,7 @@ def get_mock_emissions_data(
     else:
         las = all_las
 
-    # Default sectors
+    # Default sectors (all 8 sectors from ghg_emissions_tbl)
     all_sectors = [
         "Industry",
         "Commercial",
@@ -77,6 +77,7 @@ def get_mock_emissions_data(
         "Transport",
         "Agriculture",
         "LULUCF",
+        "Waste",
     ]
     sector_list = [s for s in all_sectors if s in sectors] if sectors else all_sectors
 
@@ -90,6 +91,7 @@ def get_mock_emissions_data(
             "Transport": 420,
             "Agriculture": 25,
             "LULUCF": -15,
+            "Waste": 35,
         },
         "Bristol": {
             "Industry": 580,
@@ -99,6 +101,7 @@ def get_mock_emissions_data(
             "Transport": 920,
             "Agriculture": 10,
             "LULUCF": -35,
+            "Waste": 95,
         },
         "South Gloucestershire": {
             "Industry": 420,
@@ -108,6 +111,7 @@ def get_mock_emissions_data(
             "Transport": 680,
             "Agriculture": 45,
             "LULUCF": -25,
+            "Waste": 55,
         },
         "North Somerset": {
             "Industry": 210,
@@ -117,6 +121,7 @@ def get_mock_emissions_data(
             "Transport": 520,
             "Agriculture": 55,
             "LULUCF": -20,
+            "Waste": 40,
         },
     }
 
