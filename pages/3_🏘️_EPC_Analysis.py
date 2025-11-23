@@ -480,14 +480,16 @@ with st.spinner("Loading EPC data..."):
         )
 
         if has_co2_data:
-            # Filter out nulls and calculate CO2 savings
+            # Filter out nulls and ensure current > potential for savings
             co2_df = df.filter(
                 pl.col("co2_emissions_current").is_not_null()
                 & pl.col("co2_emissions_potential").is_not_null()
                 & (pl.col("co2_emissions_current") > 0)
+                & (pl.col("co2_emissions_potential") >= 0)
             )
 
-            if not co2_df.is_empty():
+            if not co2_df.is_empty() and "current_energy_rating" in co2_df.columns:
+                # Calculate CO2 savings and aggregate by rating
                 co2_savings = (
                     co2_df.with_columns(
                         (
@@ -495,26 +497,43 @@ with st.spinner("Loading EPC data..."):
                             - pl.col("co2_emissions_potential")
                         ).alias("co2_savings")
                     )
+                    .filter(pl.col("current_energy_rating").is_not_null())
                     .group_by("current_energy_rating")
                     .agg(
                         pl.mean("co2_savings").alias("avg_savings"),
                         pl.sum("co2_savings").alias("total_savings"),
+                        pl.len().alias("property_count"),
                     )
+                    .filter(pl.col("property_count") > 0)
                     .sort("current_energy_rating")
                 )
 
-                fig_savings = create_bar_comparison(
-                    co2_savings,
-                    x="current_energy_rating",
-                    y="avg_savings",
-                    title="Average CO2 Savings Potential by Current Rating",
-                    x_label="Current Energy Rating",
-                    y_label="Avg CO2 Savings (t/year)",
-                    orientation="v",
-                    template="weca",
+                # Only show chart if we have meaningful data
+                # (any non-null, non-zero values)
+                has_meaningful_data = (
+                    not co2_savings.is_empty()
+                    and co2_savings["avg_savings"].drop_nulls().len() > 0
+                    and (co2_savings["avg_savings"].abs().sum() or 0) > 0.001
                 )
 
-                st.plotly_chart(fig_savings, width="stretch")
+                if has_meaningful_data:
+                    fig_savings = create_bar_comparison(
+                        co2_savings,
+                        x="current_energy_rating",
+                        y="avg_savings",
+                        title="Average CO2 Savings Potential by Current Rating",
+                        x_label="Current Energy Rating",
+                        y_label="Avg CO2 Savings (t/year)",
+                        orientation="v",
+                        template="weca",
+                    )
+
+                    st.plotly_chart(fig_savings, width="stretch")
+                else:
+                    st.info(
+                        "Insufficient CO2 savings data. This may occur when current "
+                        "and potential emissions are equal or data is incomplete."
+                    )
             else:
                 st.info("No CO2 emissions data available for the selected filters.")
         else:
