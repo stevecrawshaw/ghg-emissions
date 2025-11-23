@@ -68,7 +68,7 @@ def get_mock_emissions_data(
     else:
         las = all_las
 
-    # Default sectors
+    # Default sectors (all 8 sectors from ghg_emissions_tbl)
     all_sectors = [
         "Industry",
         "Commercial",
@@ -77,6 +77,7 @@ def get_mock_emissions_data(
         "Transport",
         "Agriculture",
         "LULUCF",
+        "Waste",
     ]
     sector_list = [s for s in all_sectors if s in sectors] if sectors else all_sectors
 
@@ -90,6 +91,7 @@ def get_mock_emissions_data(
             "Transport": 420,
             "Agriculture": 25,
             "LULUCF": -15,
+            "Waste": 35,
         },
         "Bristol": {
             "Industry": 580,
@@ -99,6 +101,7 @@ def get_mock_emissions_data(
             "Transport": 920,
             "Agriculture": 10,
             "LULUCF": -35,
+            "Waste": 95,
         },
         "South Gloucestershire": {
             "Industry": 420,
@@ -108,6 +111,7 @@ def get_mock_emissions_data(
             "Transport": 680,
             "Agriculture": 45,
             "LULUCF": -25,
+            "Waste": 55,
         },
         "North Somerset": {
             "Industry": 210,
@@ -117,6 +121,7 @@ def get_mock_emissions_data(
             "Transport": 520,
             "Agriculture": 55,
             "LULUCF": -20,
+            "Waste": 40,
         },
     }
 
@@ -396,6 +401,49 @@ def get_emissions_year_range() -> tuple[int, int, bool]:
 
     except MotherDuckConnectionError:
         return 2005, 2023, True  # Mock fallback range
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_emissions_sectors() -> tuple[list[str], bool]:
+    """Get the available sectors from emissions data.
+
+    Queries the database to find all distinct sectors available.
+    Falls back to default sectors if database unavailable.
+
+    Returns:
+        Tuple of (list of sector names, is_mock_data)
+    """
+    from src.data.connections import MotherDuckConnectionError, get_connection
+
+    # Default sectors matching the schema
+    default_sectors = [
+        "Industry",
+        "Commercial",
+        "Public Sector",
+        "Domestic",
+        "Transport",
+        "Agriculture",
+        "LULUCF",
+        "Waste",
+    ]
+
+    try:
+        conn = get_connection()
+        result = conn.sql("""
+            SELECT DISTINCT la_ghg_sector
+            FROM ghg_emissions_tbl
+            WHERE la_ghg_sector IS NOT NULL
+            ORDER BY la_ghg_sector
+        """).fetchall()
+        conn.close()
+
+        if result:
+            sectors = [row[0] for row in result]
+            return sectors, False
+        return default_sectors, True  # Fallback if no data
+
+    except MotherDuckConnectionError:
+        return default_sectors, True  # Mock fallback
 
 
 # =============================================================================
