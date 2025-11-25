@@ -19,6 +19,7 @@ from src.components.filters import (
     single_year_filter,
 )
 from src.data.connections import MotherDuckConnectionError, get_connection
+from src.utils.config import apply_home_page_label
 from src.visualization.maps import create_choropleth_map
 
 # Page configuration
@@ -27,6 +28,9 @@ st.set_page_config(
     page_icon="🗺️",
     layout="wide",
 )
+
+# Apply Home label to sidebar
+apply_home_page_label()
 
 # Title and description
 st.title("🗺️ Geographic Analysis")

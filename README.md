@@ -28,12 +28,14 @@ An interactive web-based dashboard for analyzing and visualizing greenhouse gas 
 ## Geographic Scope
 
 **Primary Focus - West of England Combined Authority**:
+
 - Bath and North East Somerset
 - Bristol
 - South Gloucestershire
 - North Somerset (included for regional context)
 
 **Comparisons**:
+
 - Other UK Combined Authorities (Greater Manchester, West Midlands, etc.)
 - England national averages
 
@@ -102,10 +104,10 @@ ghg-emissions/
 
 ## Data Sources
 
-- **Emissions Data**: UK Government sub-national GHG emissions statistics
-- **EPC Data**: Energy Performance Certificate register (domestic properties)
-- **Geographic Data**: ONS boundary data for LSOAs, MSOAs, LAs, and Combined Authorities
-- **Socio-economic Data**: Index of Multiple Deprivation, housing tenure
+- **Emissions Data**: [UK Government sub-national GHG emissions statistics](https://www.gov.uk/government/statistics/uk-local-authority-and-regional-greenhouse-gas-emissions-statistics-2005-to-2023)
+- **EPC Data**: [Energy Performance Certificate register (domestic properties)](https://epc.opendatacommunities.org/)
+- **Geographic Data**: [ONS boundary data for LSOAs, MSOAs, LAs, and Combined Authorities](https://geoportal.statistics.gov.uk/)
+- **Socio-economic Data**: [Index of Multiple Deprivation, housing tenure](https://www.nomisweb.co.uk/)
 
 All data is accessed via read-only connection to MotherDuck cloud database.
 
@@ -145,6 +147,7 @@ uv add package-name --group dev  # Development dependency
 ## Accessibility
 
 The dashboard is designed to meet WCAG 2.1 Level AA guidelines:
+
 - Color contrast ratios meet minimum requirements
 - Interactive elements are keyboard accessible
 - Charts include descriptive captions

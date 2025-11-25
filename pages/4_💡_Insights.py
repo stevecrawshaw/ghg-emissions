@@ -20,6 +20,7 @@ from src.components.filters import (
     metric_selector,
     single_year_filter,
 )
+from src.utils.config import apply_home_page_label
 from src.visualization.charts import (
     create_bar_comparison,
     create_time_series,
@@ -43,6 +44,9 @@ st.set_page_config(
     page_icon="💡",
     layout="wide",
 )
+
+# Apply Home label to sidebar
+apply_home_page_label()
 
 # Page header
 st.title("💡 Insights & Comparisons")

@@ -29,6 +29,7 @@ from src.data.mock_data import (
     load_local_authorities_with_fallback,
 )
 from src.data.transforms import aggregate_time_series
+from src.utils.config import apply_home_page_label
 from src.visualization.charts import (
     create_bar_comparison,
     create_stacked_area,
@@ -48,6 +49,9 @@ st.set_page_config(
     page_icon="📊",
     layout="wide",
 )
+
+# Apply Home label to sidebar
+apply_home_page_label()
 
 # Page header
 st.title("📊 Emissions Overview")

@@ -23,6 +23,7 @@ from src.data.mock_data import (
     load_epc_domestic_with_fallback,
     load_local_authorities_with_fallback,
 )
+from src.utils.config import apply_home_page_label
 from src.visualization.charts import (
     create_bar_comparison,
     create_donut_chart,
@@ -43,6 +44,9 @@ st.set_page_config(
     page_icon="🏘️",
     layout="wide",
 )
+
+# Apply Home label to sidebar
+apply_home_page_label()
 
 # Page header
 st.title("🏘️ EPC Analysis - Domestic Properties")

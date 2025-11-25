@@ -22,6 +22,7 @@ License: GNU AGPL v3
 import streamlit as st
 from dotenv import load_dotenv
 
+from src.utils.config import apply_home_page_label
 from src.visualization.themes import WEST_GREEN, register_weca_template
 
 # Load environment variables
@@ -67,6 +68,9 @@ def main() -> None:
             """,
         },
     )
+
+    # Override page title in sidebar to show "Home" instead of "app"
+    apply_home_page_label()
 
     # Custom CSS for WECA branding
     st.markdown(
@@ -202,9 +206,8 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Sidebar info
+    # Sidebar info (removed "Dashboard" heading)
     with st.sidebar:
-        st.markdown("## 📊 Dashboard")
         st.markdown("---")
         st.markdown("### 📚 Quick Links")
         st.markdown(

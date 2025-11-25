@@ -10,6 +10,7 @@ An interactive web-based dashboard for analyzing and visualizing greenhouse gas 
 **License**: GNU AGPL v3
 
 ### Key Features
+
 - Sub-national emissions analysis (Local Authority & Combined Authority level)
 - Multi-level geographic visualization (LSOA, MSOA, LA, CA)
 - Energy Performance Certificate (EPC) data analysis (domestic & non-domestic)
@@ -21,6 +22,7 @@ An interactive web-based dashboard for analyzing and visualizing greenhouse gas 
 ## Technology Stack
 
 ### Core Technologies
+
 - **Python**: 3.13+ (see `.python-version`)
 - **Package Manager**: `uv` (strict requirement - NEVER edit pyproject.toml directly)
 - **Linter/Formatter**: `ruff` (see `ruff.toml`)
@@ -32,7 +34,9 @@ An interactive web-based dashboard for analyzing and visualizing greenhouse gas 
 After evaluating options for Python-based, easy-to-maintain, performant dashboards:
 
 #### Primary Framework: **Streamlit**
+
 **Rationale**:
+
 - Native Streamlit Cloud hosting (free/cheap)
 - Minimal boilerplate, rapid development
 - Excellent Python data ecosystem integration
@@ -41,6 +45,7 @@ After evaluating options for Python-based, easy-to-maintain, performant dashboar
 - Easy to test and iterate
 
 **Alternatives Considered**:
+
 - Plotly Dash: More complex, better for large teams
 - Panel: More flexible but steeper learning curve
 - Gradio: Too limited for this use case
@@ -48,6 +53,7 @@ After evaluating options for Python-based, easy-to-maintain, performant dashboar
 #### Visualization Libraries
 
 **For Charts**: **Plotly**
+
 - Highly interactive (zoom, pan, hover, filter)
 - Comprehensive chart types (time series, bar, scatter, heatmaps)
 - Excellent Streamlit integration
@@ -55,11 +61,13 @@ After evaluating options for Python-based, easy-to-maintain, performant dashboar
 - Built-in export capabilities
 
 **For Maps**: **Folium** (primary) or **Pydeck** (advanced use cases)
+
 - Folium: Leaflet-based, easy GeoJSON support, good for choropleth maps
 - Pydeck: More performant for large point datasets, 3D capabilities
 - Both integrate well with Streamlit
 
 **Alternative/Supplementary**: **Altair**
+
 - Declarative syntax (good for quick exploratory viz)
 - Vega-Lite based (good browser performance)
 - Use for simpler statistical plots
@@ -69,18 +77,21 @@ After evaluating options for Python-based, easy-to-maintain, performant dashboar
 **Recommendation: Start Web App Only**
 
 **Phase 1 (Current)**: Pure Streamlit web application
+
 - Simpler architecture
 - Faster development
 - Meets stated requirements
 - User interaction is primary goal
 
 **Phase 2 (Future - If Needed)**: Add API Endpoints
+
 - Use FastAPI alongside Streamlit
 - Expose data endpoints for external integrations
 - Enable programmatic access for power users
 - Allow other services to consume the data
 
 **Benefits of API (when needed)**:
+
 - External system integrations
 - Automated data pulls by partners
 - Mobile app development
@@ -150,11 +161,13 @@ ghg-emissions/
 ### Code Development Style
 
 **Interactive Python Scripts** (not Jupyter notebooks):
+
 - Use `.py` files with IPython code fences: `# %%`
 - Execute interactively with VS Code's Python Interactive window
 - Benefits: Version control friendly, modular, testable
 
 **Reusable Modules First**:
+
 - Write functions and classes in `src/`
 - Import and test in interactive scripts
 - Keep business logic separate from exploratory analysis
@@ -162,6 +175,7 @@ ghg-emissions/
 ### Data Processing Philosophy
 
 **Preference Order**:
+
 1. **DuckDB Relational API** (Python): Most performant with MotherDuck
 2. **DuckDB SQL API**: For complex queries, use `conn.sql("SELECT ...")`
 3. **Polars**: Only when operation can't be done efficiently in DuckDB
@@ -184,6 +198,7 @@ uv sync
 ```
 
 **NEVER**:
+
 - Manually edit `pyproject.toml`
 - Use `pip install` directly
 - Forget to commit `uv.lock` changes
@@ -193,6 +208,7 @@ uv sync
 Follow `agent-docs/python-code-guidelines.md` strictly:
 
 #### Modern Python Syntax (3.10+)
+
 ```python
 # Type hints (mandatory)
 def process_emissions(year: int, authority: str) -> dict[str, float]:
@@ -222,6 +238,7 @@ schema_file = data_dir / "schema.sql"
 ```
 
 #### Google-Style Docstrings
+
 ```python
 def calculate_per_capita_emissions(
     total_emissions: float,
@@ -245,12 +262,14 @@ def calculate_per_capita_emissions(
 ```
 
 #### Ruff Compliance
+
 - Line length: 88 characters
 - Selected rules: E, W, F, UP, S, B, SIM, I
 - Auto-fix enabled: Run `ruff check --fix .`
 - Format: Run `ruff format .`
 
 #### Error Handling
+
 ```python
 # Catch specific exceptions
 try:
@@ -269,6 +288,7 @@ with Path("data.csv").open() as f:
 ### Connection Management
 
 **Credentials**: Environment variables only
+
 ```bash
 # .env file (never commit)
 MOTHERDUCK_TOKEN=your_token_here
@@ -291,10 +311,12 @@ def get_connection() -> duckdb.DuckDBPyConnection:
 ```
 
 **Database**: `mca_data` on MotherDuck
+
 - Contains all tables described in `schema/schema.sql`
 - See `schema/enriched-schema.xml` for detailed table/column descriptions
 
 **Access Pattern**: Read-only
+
 - No writes to MotherDuck
 - Local caching for development (optional)
 - Use Streamlit's `@st.cache_data` for query results
@@ -302,6 +324,7 @@ def get_connection() -> duckdb.DuckDBPyConnection:
 ### Schema Updates
 
 **Schema Changes**: EPC and other schemas can change
+
 - Store schema in `schema/` directory
 - Version schema files: `schema_v1.sql`, `schema_v2.sql`
 - Include schema validation in tests
@@ -310,12 +333,14 @@ def get_connection() -> duckdb.DuckDBPyConnection:
 ### Schema Introspection
 
 **Enriched Schema Documentation**: `schema/enriched-schema.xml`
+
 - Contains `<description>` tags for all tables and columns in the `mca_data` database
 - Use this file to understand table purposes and column meanings
 - More detailed than the raw SQL schema
 - Helpful for data exploration and query planning
 
 **Example Usage**:
+
 ```python
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -338,6 +363,7 @@ for table in root.findall(".//table"):
 **Key Tables** (from `schema/schema.sql`):
 
 **Emissions**:
+
 - `ghg_emissions_tbl`: **Primary emissions dataset** - most comprehensive GHG data
   - Contains detailed greenhouse gas emissions by sector and sub-sector
   - Territorial emissions and emissions within scope of LA influence
@@ -352,17 +378,20 @@ for table in root.findall(".//table"):
 **Note**: When starting new emissions analysis, prefer `ghg_emissions_tbl` as the source of truth
 
 **Energy Performance Certificates**:
+
 - `epc_domestic_tbl`: Domestic properties (~80+ columns)
 - `epc_nondom_tbl`: Non-domestic properties
 - `epc_domestic_vw`, `epc_domestic_ods_vw`: Enriched views
 
 **Geography**:
+
 - `postcodes_tbl`: Full UK postcode lookup
 - `lsoa_poly_2011_tbl`, `lsoa_poly_2021_tbl`: LSOA boundaries (with geometry)
 - `ca_boundaries_bgc_tbl`: Combined authority boundaries
 - `ca_la_tbl`: CA to LA lookup
 
 **Socio-economic**:
+
 - `imd_lsoa_tbl`: Index of Multiple Deprivation
 - `tenure_tbl`: Housing tenure by LSOA
 
@@ -373,6 +402,7 @@ for table in root.findall(".//table"):
 **Comprehensive Testing**: Unit, integration, and data validation
 
 ### Test Structure
+
 ```
 tests/
 ├── unit/
@@ -390,12 +420,14 @@ tests/
 ### Testing Data Pipelines
 
 **Required Tests**:
+
 1. **Schema Validation**: Ensure query results match expected schema
 2. **Data Quality**: Check for nulls, outliers, date ranges
 3. **Transformation Logic**: Unit test calculations (e.g., per capita emissions)
 4. **Integration**: Test full pipeline from MotherDuck to visualization
 
 **Example**:
+
 ```python
 # tests/unit/test_transforms.py
 import pytest
@@ -416,6 +448,7 @@ def test_per_capita_emissions_invalid():
 ```
 
 ### Running Tests
+
 ```bash
 # Run all tests
 uv run pytest
@@ -437,6 +470,7 @@ uv run pytest -v
 ### Color Palette
 
 **Primary Colors**:
+
 - West Green: `#40A832` (primary brand color)
 - Forest Green: `#1D4F2B` (dark accent)
 - Rich Purple: `#590075`
@@ -444,6 +478,7 @@ uv run pytest -v
 - Black: `#1F1F1F`
 
 **Secondary Colors**:
+
 - Soft Green: `#8FCC87` (charts)
 - Soft Purple: `#9C66AB` (charts)
 - Soft Claret: `#ED8073` (charts)
@@ -454,18 +489,21 @@ uv run pytest -v
 ### Typography
 
 **Brand Fonts** (preferred):
+
 - Headlines: Avenir Black
 - Introduction: Avenir Medium
 - Subheadings: Open Sans Bold
 - Body: Open Sans Regular
 
 **System Fonts** (fallback):
+
 - Headlines: Trebuchet MS Bold
 - Body: Trebuchet MS Regular
 
 ### Streamlit Theming
 
 Create `.streamlit/config.toml`:
+
 ```toml
 [theme]
 primaryColor = "#40A832"      # West Green
@@ -481,6 +519,7 @@ maxUploadSize = 200
 ```
 
 ### Chart Styling
+
 ```python
 # src/visualization/themes.py
 WECA_COLORS = {
@@ -504,6 +543,7 @@ def get_plotly_template() -> dict:
 ## Geographic Scope
 
 **Primary Focus**:
+
 - **West of England Combined Authority (WECA)**:
   - Bath and North East Somerset
   - Bristol
@@ -511,28 +551,33 @@ def get_plotly_template() -> dict:
 - **North Somerset** (not yet WECA member, but included)
 
 **Comparison Geographies**:
+
 - Other UK Combined Authorities (headline indicators)
 - Regional benchmarks (South West England)
 - National benchmarks (England)
 
 **Geographic Levels**:
+
 - **LSOA** (Lower Super Output Area): Smallest unit (~1,500 people)
 - **MSOA** (Middle Super Output Area): ~7,500 people
 - **LA** (Local Authority): District/Unitary authority
 - **CA** (Combined Authority): WECA
 
 **Time Coverage**: Most recent 10 years (currently 2014-2023)
+
 - Note: Emissions data has ~18-month lag (2023 data released July 2025)
 
 ## Performance Requirements
 
 **Critical Thresholds**:
+
 - Initial page load: < 3 seconds
 - Chart interactions: < 500ms
 - Map rendering: < 2 seconds
 - Data export: < 10 seconds (up to 100k rows)
 
 **Optimization Strategies**:
+
 1. **Query Optimization**: Push filters to MotherDuck (don't fetch then filter)
 2. **Caching**: Use `@st.cache_data` for expensive queries
 3. **Aggregation**: Pre-aggregate where possible (use database views)
@@ -540,6 +585,7 @@ def get_plotly_template() -> dict:
 5. **Pagination**: For large tables, use pagination (25-100 rows per page)
 
 **Monitoring**:
+
 ```python
 import streamlit as st
 import time
@@ -562,6 +608,7 @@ def load_emissions_data(year: int) -> pl.DataFrame:
 **Target**: WCAG 2.1 Level AA where possible
 
 **Key Requirements**:
+
 1. **Color Contrast**: 4.5:1 for text, 3:1 for large text/UI components
 2. **Keyboard Navigation**: All interactive elements accessible via keyboard
 3. **Screen Reader Support**: Proper ARIA labels, alt text
@@ -569,6 +616,7 @@ def load_emissions_data(year: int) -> pl.DataFrame:
 5. **Semantic HTML**: Proper heading hierarchy
 
 **Streamlit-Specific**:
+
 ```python
 # Use descriptive labels
 st.selectbox("Select Local Authority", options=authorities, key="la_select")
@@ -581,7 +629,7 @@ st.markdown("## Time Series Analysis")  # H2
 st.markdown("### By Sector")             # H3
 
 # Provide text alternatives for charts
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width = 'stretch')
 st.caption("Chart shows emissions declining from 2005 to 2023...")
 ```
 
@@ -592,6 +640,7 @@ st.caption("Chart shows emissions declining from 2005 to 2023...")
 ### CLI Tools (Installed via SessionStart Hook)
 
 **Available Tools** (see `agent-docs/cli-tools-memory.md`):
+
 - `rg` (ripgrep): Fast pattern search
 - `fdfind` (fd-find): Fast file finder
 - `batcat` (bat): Syntax-highlighted file preview
@@ -600,18 +649,28 @@ st.caption("Chart shows emissions declining from 2005 to 2023...")
 - `sed`: Text transformation
 
 **Usage Examples**:
+
 ```bash
 # Find all TODO comments
 rg "TODO|FIXME" --glob '*.py'
 
 # Find all Streamlit page files
+# Ubuntu
 fdfind "*.py" src/pages/
+# Windows
+fd "*.py" src/pages/ 
 
 # Preview with syntax highlighting
+# Ubuntu
 batcat -n src/data/connections.py
+# Windows
+bat -n src/data/connections.py
 
 # View project structure
+# Ubuntu
 tree src/ -L 2
+# Windows
+cmd //c tree src/ -L 2 
 
 # Parse JSON config
 jq '.colors.primary_colors' weca-brand.json
@@ -620,6 +679,7 @@ jq '.colors.primary_colors' weca-brand.json
 ### Recommended VS Code Extensions
 
 See `.vscode/extensions.json`:
+
 - `ms-python.python`: Python support
 - `ms-python.vscode-pylance`: Type checking
 - `ms-toolsai.jupyter`: Interactive Python
@@ -673,7 +733,7 @@ data = conn.sql("SELECT * FROM ...").pl()
 
 # Create visualization
 fig = create_time_series(data, x="year", y="emissions")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width = 'stretch')
 ```
 
 ### Adding a New Dependency
@@ -726,6 +786,7 @@ uv run python scripts/generate_schema_docs.py
 ### When to Consult This File
 
 **Always consult CLAUDE.md for**:
+
 - Project architecture decisions
 - Technology choices
 - Code style questions
@@ -736,6 +797,7 @@ uv run python scripts/generate_schema_docs.py
 ### Project Context Awareness
 
 **Understand**:
+
 - This is a single-developer project (intermediate Python skills)
 - Performance matters (3s load time target)
 - Accessibility is required (WCAG AA)
@@ -745,6 +807,7 @@ uv run python scripts/generate_schema_docs.py
 ### Code Generation Guidelines
 
 **When writing code**:
+
 1. Always follow `agent-docs/python-code-guidelines.md`
 2. Use type hints comprehensively
 3. Write Google-style docstrings
@@ -755,12 +818,14 @@ uv run python scripts/generate_schema_docs.py
 8. Consider accessibility (ARIA labels, contrast)
 
 **When suggesting dependencies**:
+
 1. Prefer lightweight libraries
 2. Check if functionality exists in current stack
 3. Provide `uv add` command (never edit pyproject.toml)
 4. Explain rationale for new dependency
 
 **When refactoring**:
+
 1. Ensure backward compatibility
 2. Update tests
 3. Update docstrings
@@ -770,6 +835,7 @@ uv run python scripts/generate_schema_docs.py
 ### Research Tasks
 
 If asked to research:
+
 - Dashboard frameworks → Recommend Streamlit + Plotly (as documented)
 - Map libraries → Recommend Folium (primary) or Pydeck (advanced)
 - Data processing → Recommend DuckDB relational API
@@ -778,6 +844,7 @@ If asked to research:
 ### Prohibited Actions
 
 **Never**:
+
 - Manually edit `pyproject.toml` (use `uv add`)
 - Commit secrets or tokens
 - Use `pip install` directly (use `uv`)
@@ -790,6 +857,7 @@ If asked to research:
 ## Questions & Clarifications
 
 For questions not covered in this document, consult:
+
 1. `agent-docs/responses-to-claude-init-questions.md` - Original Q&A
 2. `agent-docs/python-code-guidelines.md` - Code standards
 3. `README.md` - Public-facing project description
@@ -798,5 +866,5 @@ For questions not covered in this document, consult:
 ---
 
 **Document Version**: 1.0
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-11-25
 **Maintained By**: Project maintainer + AI agents

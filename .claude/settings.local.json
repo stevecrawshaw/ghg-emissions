@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run python:*)",
+      "Bash(python -c \"import base64, json; token=''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im11cnJheWphcnZpc0BnbWFpbC5jb20iLCJtZFJlZ2lvbiI6ImF3cy11cy1lYXN0LTEiLCJzZXNzaW9uIjoibXVycmF5amFydmlzLmdtYWlsLmNvbSIsInBhdCI6IlYzY1Fna1ZMN2lYM0NxREZqZlJjUUhPMTMxRFFOWTVvM2FIOGRuczVURW8iLCJ1c2VySWQiOiJhMjRkYTM2Ni0zYTA1LTQ2NjQtYmMwOS1mYzA5YWU5OTZiM2EiLCJpc3MiOiJtZF9wYXQiLCJyZWFkT25seSI6ZmFsc2UsInRva2VuVHlwZSI6InJlYWRfd3JpdGUiLCJpYXQiOjE3NjQwNjY1Mjh9.tXKMSzI-ABHh9emkG-tiIMapG8YtS3M4N0MYw8BFI_M''; parts = token.split(''.''); payload = parts[1] + ''='' * (4 - len(parts[1]) % 4); from datetime import datetime; data = json.loads(base64.urlsafe_b64decode(payload)); print(f\"\"Email: {data[''email'']}\"\"); print(f\"\"Issued: {datetime.fromtimestamp(data[''iat''])}\"\"); print(f\"\"Read Only: {data[''readOnly'']}\"\"); print(f\"\"Token Type: {data[''tokenType'']}\"\")\")",
+      "Bash(fd:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
