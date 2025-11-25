@@ -221,3 +221,4 @@ duckdb.exe
 duckdb
 config.yml
 .mcp.json
+.streamlit/secrets.toml
